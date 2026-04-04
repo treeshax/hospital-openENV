@@ -1,4 +1,4 @@
-# 🏥 Smart Hospital: RL Management Dashboard
+# Smart Hospital: RL Management Dashboard
 
 A Reinforcement Learning (RL) powered simulation dashboard designed to optimize hospital resource allocation and patient triage. This project transitions complex RL decision logic into a visual, interactive experience for monitoring agent performance and hospital resource impact.
 
@@ -42,6 +42,13 @@ streamlit run scripts/dashboard.py
 - **🤖 Agent Decisions**: Instant feedback on the agent's latest action, comparing its choice with the ground truth outcome.
 - **📊 Real-time Metrics**: Tracking Total Reward, Avg Reward, and System Throughput.
 - **🎮 Controls**: Step-by-step simulation or full episode automation.
+
+---
+
+## UI Preview (Draft)
+<img width="1512" height="982" alt="Screenshot 2026-04-05 at 5 02 46 AM" src="https://github.com/user-attachments/assets/4ea262b4-96a6-46e1-9fc3-2c5c601ce17d" />
+
+
 
 ---
 Built with ❤️ for AI research and hospital efficiency.
