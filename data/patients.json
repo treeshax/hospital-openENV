@@ -1,18 +1,802 @@
 [
   {
     "symptoms": "chest pain",
-    "age": 65,
-    "heart_rate": 120,
-    "blood_pressure": 90,
+    "age": 78,
+    "heart_rate": 146,
+    "blood_pressure": 88,
+    "true_priority": 5,
+    "department": "cardiology"
+  },
+  {
+    "symptoms": "cough",
+    "age": 73,
+    "heart_rate": 101,
+    "blood_pressure": 113,
+    "true_priority": 1,
+    "department": "general"
+  },
+  {
+    "symptoms": "numbness",
+    "age": 74,
+    "heart_rate": 128,
+    "blood_pressure": 104,
+    "true_priority": 3,
+    "department": "neurology"
+  },
+  {
+    "symptoms": "palpitations",
+    "age": 30,
+    "heart_rate": 109,
+    "blood_pressure": 80,
+    "true_priority": 3,
+    "department": "cardiology"
+  },
+  {
+    "symptoms": "head injury",
+    "age": 66,
+    "heart_rate": 90,
+    "blood_pressure": 137,
+    "true_priority": 1,
+    "department": "neurology"
+  },
+  {
+    "symptoms": "chest pain",
+    "age": 50,
+    "heart_rate": 95,
+    "blood_pressure": 91,
+    "true_priority": 4,
+    "department": "cardiology"
+  },
+  {
+    "symptoms": "stomach ache",
+    "age": 95,
+    "heart_rate": 141,
+    "blood_pressure": 85,
+    "true_priority": 5,
+    "department": "general"
+  },
+  {
+    "symptoms": "cough",
+    "age": 5,
+    "heart_rate": 69,
+    "blood_pressure": 136,
+    "true_priority": 1,
+    "department": "general"
+  },
+  {
+    "symptoms": "dizziness",
+    "age": 56,
+    "heart_rate": 108,
+    "blood_pressure": 137,
+    "true_priority": 1,
+    "department": "neurology"
+  },
+  {
+    "symptoms": "chest pain",
+    "age": 93,
+    "heart_rate": 146,
+    "blood_pressure": 96,
     "true_priority": 5,
     "department": "cardiology"
   },
   {
     "symptoms": "head injury",
-    "age": 40,
-    "heart_rate": 100,
+    "age": 33,
+    "heart_rate": 87,
+    "blood_pressure": 128,
+    "true_priority": 1,
+    "department": "neurology"
+  },
+  {
+    "symptoms": "palpitations",
+    "age": 27,
+    "heart_rate": 150,
+    "blood_pressure": 88,
+    "true_priority": 5,
+    "department": "cardiology"
+  },
+  {
+    "symptoms": "fever",
+    "age": 47,
+    "heart_rate": 65,
+    "blood_pressure": 113,
+    "true_priority": 1,
+    "department": "general"
+  },
+  {
+    "symptoms": "chest pain",
+    "age": 23,
+    "heart_rate": 138,
     "blood_pressure": 110,
     "true_priority": 4,
+    "department": "cardiology"
+  },
+  {
+    "symptoms": "sore throat",
+    "age": 58,
+    "heart_rate": 65,
+    "blood_pressure": 126,
+    "true_priority": 1,
+    "department": "general"
+  },
+  {
+    "symptoms": "head injury",
+    "age": 6,
+    "heart_rate": 69,
+    "blood_pressure": 111,
+    "true_priority": 1,
     "department": "neurology"
+  },
+  {
+    "symptoms": "blurred vision",
+    "age": 53,
+    "heart_rate": 109,
+    "blood_pressure": 112,
+    "true_priority": 1,
+    "department": "neurology"
+  },
+  {
+    "symptoms": "numbness",
+    "age": 87,
+    "heart_rate": 62,
+    "blood_pressure": 133,
+    "true_priority": 1,
+    "department": "neurology"
+  },
+  {
+    "symptoms": "blurred vision",
+    "age": 86,
+    "heart_rate": 69,
+    "blood_pressure": 111,
+    "true_priority": 1,
+    "department": "neurology"
+  },
+  {
+    "symptoms": "head injury",
+    "age": 78,
+    "heart_rate": 115,
+    "blood_pressure": 88,
+    "true_priority": 5,
+    "department": "neurology"
+  },
+  {
+    "symptoms": "cough",
+    "age": 22,
+    "heart_rate": 63,
+    "blood_pressure": 126,
+    "true_priority": 1,
+    "department": "general"
+  },
+  {
+    "symptoms": "palpitations",
+    "age": 46,
+    "heart_rate": 96,
+    "blood_pressure": 85,
+    "true_priority": 3,
+    "department": "cardiology"
+  },
+  {
+    "symptoms": "numbness",
+    "age": 36,
+    "heart_rate": 88,
+    "blood_pressure": 119,
+    "true_priority": 1,
+    "department": "neurology"
+  },
+  {
+    "symptoms": "shortness of breath",
+    "age": 37,
+    "heart_rate": 147,
+    "blood_pressure": 89,
+    "true_priority": 5,
+    "department": "cardiology"
+  },
+  {
+    "symptoms": "shortness of breath",
+    "age": 17,
+    "heart_rate": 129,
+    "blood_pressure": 98,
+    "true_priority": 5,
+    "department": "cardiology"
+  },
+  {
+    "symptoms": "palpitations",
+    "age": 71,
+    "heart_rate": 97,
+    "blood_pressure": 99,
+    "true_priority": 3,
+    "department": "cardiology"
+  },
+  {
+    "symptoms": "palpitations",
+    "age": 30,
+    "heart_rate": 128,
+    "blood_pressure": 95,
+    "true_priority": 5,
+    "department": "cardiology"
+  },
+  {
+    "symptoms": "numbness",
+    "age": 48,
+    "heart_rate": 70,
+    "blood_pressure": 112,
+    "true_priority": 1,
+    "department": "neurology"
+  },
+  {
+    "symptoms": "chest pain",
+    "age": 10,
+    "heart_rate": 133,
+    "blood_pressure": 99,
+    "true_priority": 5,
+    "department": "cardiology"
+  },
+  {
+    "symptoms": "fever",
+    "age": 65,
+    "heart_rate": 92,
+    "blood_pressure": 129,
+    "true_priority": 1,
+    "department": "general"
+  },
+  {
+    "symptoms": "blurred vision",
+    "age": 8,
+    "heart_rate": 105,
+    "blood_pressure": 139,
+    "true_priority": 1,
+    "department": "neurology"
+  },
+  {
+    "symptoms": "blurred vision",
+    "age": 74,
+    "heart_rate": 100,
+    "blood_pressure": 113,
+    "true_priority": 1,
+    "department": "neurology"
+  },
+  {
+    "symptoms": "blurred vision",
+    "age": 69,
+    "heart_rate": 110,
+    "blood_pressure": 114,
+    "true_priority": 1,
+    "department": "neurology"
+  },
+  {
+    "symptoms": "blurred vision",
+    "age": 56,
+    "heart_rate": 84,
+    "blood_pressure": 114,
+    "true_priority": 1,
+    "department": "neurology"
+  },
+  {
+    "symptoms": "chest pain",
+    "age": 10,
+    "heart_rate": 95,
+    "blood_pressure": 97,
+    "true_priority": 4,
+    "department": "cardiology"
+  },
+  {
+    "symptoms": "numbness",
+    "age": 52,
+    "heart_rate": 77,
+    "blood_pressure": 112,
+    "true_priority": 1,
+    "department": "neurology"
+  },
+  {
+    "symptoms": "head injury",
+    "age": 9,
+    "heart_rate": 63,
+    "blood_pressure": 128,
+    "true_priority": 1,
+    "department": "neurology"
+  },
+  {
+    "symptoms": "palpitations",
+    "age": 74,
+    "heart_rate": 102,
+    "blood_pressure": 105,
+    "true_priority": 1,
+    "department": "cardiology"
+  },
+  {
+    "symptoms": "palpitations",
+    "age": 68,
+    "heart_rate": 132,
+    "blood_pressure": 106,
+    "true_priority": 3,
+    "department": "cardiology"
+  },
+  {
+    "symptoms": "sore throat",
+    "age": 61,
+    "heart_rate": 111,
+    "blood_pressure": 100,
+    "true_priority": 3,
+    "department": "general"
+  },
+  {
+    "symptoms": "shortness of breath",
+    "age": 2,
+    "heart_rate": 109,
+    "blood_pressure": 89,
+    "true_priority": 3,
+    "department": "cardiology"
+  },
+  {
+    "symptoms": "shortness of breath",
+    "age": 54,
+    "heart_rate": 127,
+    "blood_pressure": 88,
+    "true_priority": 5,
+    "department": "cardiology"
+  },
+  {
+    "symptoms": "shortness of breath",
+    "age": 26,
+    "heart_rate": 125,
+    "blood_pressure": 106,
+    "true_priority": 3,
+    "department": "cardiology"
+  },
+  {
+    "symptoms": "blurred vision",
+    "age": 29,
+    "heart_rate": 108,
+    "blood_pressure": 123,
+    "true_priority": 1,
+    "department": "neurology"
+  },
+  {
+    "symptoms": "sore throat",
+    "age": 80,
+    "heart_rate": 82,
+    "blood_pressure": 134,
+    "true_priority": 1,
+    "department": "general"
+  },
+  {
+    "symptoms": "palpitations",
+    "age": 5,
+    "heart_rate": 122,
+    "blood_pressure": 100,
+    "true_priority": 3,
+    "department": "cardiology"
+  },
+  {
+    "symptoms": "numbness",
+    "age": 4,
+    "heart_rate": 68,
+    "blood_pressure": 138,
+    "true_priority": 1,
+    "department": "neurology"
+  },
+  {
+    "symptoms": "numbness",
+    "age": 12,
+    "heart_rate": 80,
+    "blood_pressure": 129,
+    "true_priority": 1,
+    "department": "neurology"
+  },
+  {
+    "symptoms": "numbness",
+    "age": 84,
+    "heart_rate": 95,
+    "blood_pressure": 139,
+    "true_priority": 1,
+    "department": "neurology"
+  },
+  {
+    "symptoms": "shortness of breath",
+    "age": 2,
+    "heart_rate": 105,
+    "blood_pressure": 89,
+    "true_priority": 3,
+    "department": "cardiology"
+  },
+  {
+    "symptoms": "dizziness",
+    "age": 18,
+    "heart_rate": 103,
+    "blood_pressure": 119,
+    "true_priority": 1,
+    "department": "neurology"
+  },
+  {
+    "symptoms": "fever",
+    "age": 61,
+    "heart_rate": 92,
+    "blood_pressure": 80,
+    "true_priority": 3,
+    "department": "general"
+  },
+  {
+    "symptoms": "numbness",
+    "age": 27,
+    "heart_rate": 60,
+    "blood_pressure": 117,
+    "true_priority": 1,
+    "department": "neurology"
+  },
+  {
+    "symptoms": "chest pain",
+    "age": 65,
+    "heart_rate": 117,
+    "blood_pressure": 108,
+    "true_priority": 4,
+    "department": "cardiology"
+  },
+  {
+    "symptoms": "numbness",
+    "age": 26,
+    "heart_rate": 62,
+    "blood_pressure": 130,
+    "true_priority": 1,
+    "department": "neurology"
+  },
+  {
+    "symptoms": "shortness of breath",
+    "age": 93,
+    "heart_rate": 149,
+    "blood_pressure": 82,
+    "true_priority": 5,
+    "department": "cardiology"
+  },
+  {
+    "symptoms": "fever",
+    "age": 50,
+    "heart_rate": 90,
+    "blood_pressure": 127,
+    "true_priority": 1,
+    "department": "general"
+  },
+  {
+    "symptoms": "shortness of breath",
+    "age": 82,
+    "heart_rate": 122,
+    "blood_pressure": 82,
+    "true_priority": 5,
+    "department": "cardiology"
+  },
+  {
+    "symptoms": "numbness",
+    "age": 15,
+    "heart_rate": 67,
+    "blood_pressure": 139,
+    "true_priority": 1,
+    "department": "neurology"
+  },
+  {
+    "symptoms": "chest pain",
+    "age": 47,
+    "heart_rate": 94,
+    "blood_pressure": 84,
+    "true_priority": 4,
+    "department": "cardiology"
+  },
+  {
+    "symptoms": "fever",
+    "age": 66,
+    "heart_rate": 67,
+    "blood_pressure": 110,
+    "true_priority": 1,
+    "department": "general"
+  },
+  {
+    "symptoms": "shortness of breath",
+    "age": 21,
+    "heart_rate": 135,
+    "blood_pressure": 109,
+    "true_priority": 3,
+    "department": "cardiology"
+  },
+  {
+    "symptoms": "chest pain",
+    "age": 67,
+    "heart_rate": 136,
+    "blood_pressure": 95,
+    "true_priority": 5,
+    "department": "cardiology"
+  },
+  {
+    "symptoms": "rash",
+    "age": 32,
+    "heart_rate": 100,
+    "blood_pressure": 131,
+    "true_priority": 1,
+    "department": "general"
+  },
+  {
+    "symptoms": "rash",
+    "age": 85,
+    "heart_rate": 127,
+    "blood_pressure": 84,
+    "true_priority": 5,
+    "department": "general"
+  },
+  {
+    "symptoms": "chest pain",
+    "age": 83,
+    "heart_rate": 101,
+    "blood_pressure": 97,
+    "true_priority": 4,
+    "department": "cardiology"
+  },
+  {
+    "symptoms": "sore throat",
+    "age": 68,
+    "heart_rate": 91,
+    "blood_pressure": 108,
+    "true_priority": 1,
+    "department": "general"
+  },
+  {
+    "symptoms": "blurred vision",
+    "age": 54,
+    "heart_rate": 106,
+    "blood_pressure": 114,
+    "true_priority": 1,
+    "department": "neurology"
+  },
+  {
+    "symptoms": "blurred vision",
+    "age": 31,
+    "heart_rate": 87,
+    "blood_pressure": 132,
+    "true_priority": 1,
+    "department": "neurology"
+  },
+  {
+    "symptoms": "chest pain",
+    "age": 57,
+    "heart_rate": 134,
+    "blood_pressure": 80,
+    "true_priority": 5,
+    "department": "cardiology"
+  },
+  {
+    "symptoms": "palpitations",
+    "age": 20,
+    "heart_rate": 96,
+    "blood_pressure": 85,
+    "true_priority": 3,
+    "department": "cardiology"
+  },
+  {
+    "symptoms": "rash",
+    "age": 86,
+    "heart_rate": 98,
+    "blood_pressure": 100,
+    "true_priority": 1,
+    "department": "general"
+  },
+  {
+    "symptoms": "numbness",
+    "age": 83,
+    "heart_rate": 84,
+    "blood_pressure": 111,
+    "true_priority": 1,
+    "department": "neurology"
+  },
+  {
+    "symptoms": "blurred vision",
+    "age": 34,
+    "heart_rate": 61,
+    "blood_pressure": 112,
+    "true_priority": 1,
+    "department": "neurology"
+  },
+  {
+    "symptoms": "chest pain",
+    "age": 29,
+    "heart_rate": 135,
+    "blood_pressure": 85,
+    "true_priority": 5,
+    "department": "cardiology"
+  },
+  {
+    "symptoms": "rash",
+    "age": 71,
+    "heart_rate": 127,
+    "blood_pressure": 91,
+    "true_priority": 5,
+    "department": "general"
+  },
+  {
+    "symptoms": "cough",
+    "age": 13,
+    "heart_rate": 89,
+    "blood_pressure": 112,
+    "true_priority": 1,
+    "department": "general"
+  },
+  {
+    "symptoms": "blurred vision",
+    "age": 93,
+    "heart_rate": 110,
+    "blood_pressure": 118,
+    "true_priority": 1,
+    "department": "neurology"
+  },
+  {
+    "symptoms": "numbness",
+    "age": 73,
+    "heart_rate": 65,
+    "blood_pressure": 127,
+    "true_priority": 1,
+    "department": "neurology"
+  },
+  {
+    "symptoms": "numbness",
+    "age": 17,
+    "heart_rate": 82,
+    "blood_pressure": 110,
+    "true_priority": 1,
+    "department": "neurology"
+  },
+  {
+    "symptoms": "chest pain",
+    "age": 74,
+    "heart_rate": 137,
+    "blood_pressure": 96,
+    "true_priority": 5,
+    "department": "cardiology"
+  },
+  {
+    "symptoms": "blurred vision",
+    "age": 44,
+    "heart_rate": 67,
+    "blood_pressure": 135,
+    "true_priority": 1,
+    "department": "neurology"
+  },
+  {
+    "symptoms": "cough",
+    "age": 50,
+    "heart_rate": 86,
+    "blood_pressure": 116,
+    "true_priority": 1,
+    "department": "general"
+  },
+  {
+    "symptoms": "sore throat",
+    "age": 64,
+    "heart_rate": 70,
+    "blood_pressure": 125,
+    "true_priority": 1,
+    "department": "general"
+  },
+  {
+    "symptoms": "palpitations",
+    "age": 94,
+    "heart_rate": 125,
+    "blood_pressure": 95,
+    "true_priority": 5,
+    "department": "cardiology"
+  },
+  {
+    "symptoms": "palpitations",
+    "age": 46,
+    "heart_rate": 92,
+    "blood_pressure": 98,
+    "true_priority": 3,
+    "department": "cardiology"
+  },
+  {
+    "symptoms": "stomach ache",
+    "age": 8,
+    "heart_rate": 67,
+    "blood_pressure": 137,
+    "true_priority": 1,
+    "department": "general"
+  },
+  {
+    "symptoms": "stomach ache",
+    "age": 59,
+    "heart_rate": 110,
+    "blood_pressure": 121,
+    "true_priority": 1,
+    "department": "general"
+  },
+  {
+    "symptoms": "head injury",
+    "age": 56,
+    "heart_rate": 68,
+    "blood_pressure": 128,
+    "true_priority": 1,
+    "department": "neurology"
+  },
+  {
+    "symptoms": "head injury",
+    "age": 37,
+    "heart_rate": 98,
+    "blood_pressure": 123,
+    "true_priority": 1,
+    "department": "neurology"
+  },
+  {
+    "symptoms": "dizziness",
+    "age": 75,
+    "heart_rate": 107,
+    "blood_pressure": 118,
+    "true_priority": 1,
+    "department": "neurology"
+  },
+  {
+    "symptoms": "palpitations",
+    "age": 26,
+    "heart_rate": 94,
+    "blood_pressure": 91,
+    "true_priority": 3,
+    "department": "cardiology"
+  },
+  {
+    "symptoms": "dizziness",
+    "age": 61,
+    "heart_rate": 82,
+    "blood_pressure": 112,
+    "true_priority": 1,
+    "department": "neurology"
+  },
+  {
+    "symptoms": "fever",
+    "age": 78,
+    "heart_rate": 113,
+    "blood_pressure": 94,
+    "true_priority": 5,
+    "department": "general"
+  },
+  {
+    "symptoms": "chest pain",
+    "age": 68,
+    "heart_rate": 124,
+    "blood_pressure": 103,
+    "true_priority": 4,
+    "department": "cardiology"
+  },
+  {
+    "symptoms": "palpitations",
+    "age": 39,
+    "heart_rate": 137,
+    "blood_pressure": 82,
+    "true_priority": 5,
+    "department": "cardiology"
+  },
+  {
+    "symptoms": "chest pain",
+    "age": 85,
+    "heart_rate": 102,
+    "blood_pressure": 86,
+    "true_priority": 4,
+    "department": "cardiology"
+  },
+  {
+    "symptoms": "dizziness",
+    "age": 89,
+    "heart_rate": 93,
+    "blood_pressure": 127,
+    "true_priority": 1,
+    "department": "neurology"
+  },
+  {
+    "symptoms": "palpitations",
+    "age": 13,
+    "heart_rate": 104,
+    "blood_pressure": 110,
+    "true_priority": 1,
+    "department": "cardiology"
+  },
+  {
+    "symptoms": "palpitations",
+    "age": 55,
+    "heart_rate": 127,
+    "blood_pressure": 91,
+    "true_priority": 5,
+    "department": "cardiology"
   }
 ]
