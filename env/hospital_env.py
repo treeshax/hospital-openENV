@@ -1,15 +1,16 @@
 import random
 from env.models import Action
 from env.rewards import compute_reward
+from env.generator import generate_patient
 
 class HospitalEnv:
 
-    def __init__(self, data):
+    def __init__(self, data=None):
         self.data = data
         self.patient = None
 
     def reset(self):
-        self.patient = random.choice(self.data)
+        self.patient = generate_patient()
         return self.state()
 
     def state(self):
