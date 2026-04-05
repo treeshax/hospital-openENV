@@ -15,6 +15,12 @@ def smart_agent(state):
         department = "cardiology"
     elif "head" in symptoms:
         department = "neurology"
+    elif "fracture" in symptoms:
+        department = "orthopedics"
+    elif "breath" in symptoms:
+        department = "pulmonology"
+    elif "unconscious" in symptoms or "bleeding" in symptoms:
+        department = "emergency"
     else:
         department = "general"
 
