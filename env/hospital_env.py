@@ -19,6 +19,9 @@ class HospitalEnv:
         self.current_step = 0
         self.patient = None
 
+        self.correct = 0
+        self.total = 0
+
     # 🔄 RESET ENVIRONMENT
     def reset(self):
         import random  # ✅ add here (or at top of file)
@@ -28,6 +31,8 @@ class HospitalEnv:
         random.shuffle(self.queue)  # ✅ SHUFFLE HERE
 
         self.current_step = 0
+        self.correct = 0
+        self.total = 0
 
         self.patient = self.queue.pop(0)
 
