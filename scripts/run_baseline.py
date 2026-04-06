@@ -1,80 +1,71 @@
-import random
-random.seed(42)
-
 from env.hospital_env import HospitalEnv
-from env.tasks import easy_task_reward, medium_task_reward, hard_task_reward
+import random
 
-# 🧠 Smart Agent (rule-based)
-def smart_agent(state):
-    symptoms = state["symptoms"]
-    hr = state["heart_rate"]
-    bp = state["blood_pressure"]
 
-    # 🏥 Department decision
-    if "chest pain" in symptoms:
-        department = "cardiology"
-    elif "head" in symptoms:
-        department = "neurology"
-    elif "fracture" in symptoms:
-        department = "orthopedics"
-    elif "breath" in symptoms:
-        department = "pulmonology"
-    elif "unconscious" in symptoms or "bleeding" in symptoms:
-        department = "emergency"
-    else:
-        department = "general"
-
-    # ⚠️ Priority decision
-    priority = 1
-
-    if hr > 110:
-        priority += 2
-    if bp < 100:
-        priority += 2
-    if "chest pain" in symptoms:
-        priority += 1
-
-    priority = min(5, priority)
+# 🎯 Simple baseline agent (random actions)
+def random_agent_action():
+    departments = ["cardiology", "neurology", "orthopedics", "general"]
+    seriousness_levels = [1, 2, 3, 4, 5]
 
     return {
-        "priority": priority,
-        "department": department
+        "department": random.choice(departments),
+        "seriousness": random.choice(seriousness_levels)
     }
 
-if __name__ == "__main__":
-    # Initialize environment
-    env = HospitalEnv(data=None)
-    
-    episodes = 20
+
+def run_episode(env):
+    state = env.reset()
+    done = False
+
     total_reward = 0
-    easy_score = 0
-    medium_score = 0
-    hard_score = 0
+    step_num = 1
 
-    for _ in range(episodes):
-        state = env.reset()
-        action = smart_agent(state)
-        _, reward, _, info = env.step(action)
-        patient = env.patient  # ground truth
+    while not done:
+        # 🩺 INPUT STATE
+        print(f"\n🩺 Step {step_num}")
+        print("INPUT STATE:")
+        print(f"Symptoms: {state['symptoms']}")
+        print(f"Age: {state['age']}")
+        print(f"Heart Rate: {state['heart_rate']}")
+        print(f"Blood Pressure: {state['blood_pressure']}")
 
-        # scoring
-        easy_score += grade_easy(patient, action)
-        medium_score += grade_medium(patient, action)
-        hard_score += grade_hard(patient, action)
+        # 🤖 AGENT ACTION
+        action = random_agent_action()
+        print("\nAGENT ACTION:")
+        print(f"Department: {action['department']}")
+        print(f"Seriousness: {action['seriousness']}")
 
-        print("State:", state)
-        print("Action:", action)
-        print("Reward:", reward)
-        print("True:", {
-            "priority": patient["true_priority"],
-            "department": patient["department"]
-        })
-        print("------")
+        # 🚀 ENV STEP
+        next_state, reward, done, info = env.step(action)
+
+        # 🎯 OUTPUT
+        print(f"\nREWARD: {reward}")
+        print(f"TRUE DEPARTMENT: {info['true_department']}")
+        print(f"TRUE SERIOUSNESS: {info['true_seriousness']}")
+        print(f"RUNNING ACCURACY: {info['accuracy']:.2f}")
+        print("-" * 40)
 
         total_reward += reward
+        state = next_state
+        step_num += 1
 
-    print("\n===== FINAL RESULTS =====")
-    print("Average Reward:", total_reward / episodes)
-    print("Easy Score:", easy_score / episodes)
-    print("Medium Score:", medium_score / episodes)
-    print("Hard Score:", hard_score / episodes)
+    return total_reward, info["accuracy"]
+
+
+if __name__ == "__main__":
+
+    # 🔥 Choose difficulty
+    TASK = "easy"   # change to "medium" or "hard"
+
+    # ✅ FIXED (no data=None)
+    env = HospitalEnv(task=TASK, max_steps=20)
+
+    EPISODES = 1  # keep 1 for clean output
+
+    for ep in range(EPISODES):
+        total_reward, accuracy = run_episode(env)
+
+        print(f"\n📊 Episode {ep+1} Summary")
+        print(f"Total Reward: {total_reward}")
+        print(f"Final Accuracy: {accuracy:.2f}")
+        print("=" * 50)
