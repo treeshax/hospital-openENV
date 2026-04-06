@@ -3,7 +3,14 @@ import random
 from collections import defaultdict
 
 # 🎯 Possible actions
-DEPARTMENTS = ["cardiology", "neurology", "orthopedics", "general"]
+DEPARTMENTS = [
+    "cardiology",
+    "neurology",
+    "orthopedics",
+    "general",
+    "pulmonology",
+    "emergency"
+]
 SERIOUSNESS = [1, 2, 3, 4, 5]
 
 ACTIONS = [(d, s) for d in DEPARTMENTS for s in SERIOUSNESS]
