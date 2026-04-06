@@ -74,7 +74,9 @@ class HospitalEnv:
             "task": self.task,
             "true_priority": self.patient["true_priority"] if not done else None,
             "true_department": self.patient["department"] if not done else None,
-            "agent_action": action_dict
+            "agent_action": action_dict,
+
+            "accuracy": self.correct / self.total if self.total > 0 else 0
         }
 
         return next_state, reward, done, info
