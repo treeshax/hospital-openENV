@@ -4,7 +4,11 @@ MAX_STEPS = 20
 
 
 def get_action(state):
-    symptoms = " ".join(state["symptoms"]).lower()
+    symptoms_data = state.get("symptoms", "")
+    if isinstance(symptoms_data, list):
+        symptoms = " ".join(symptoms_data).lower()
+    else:
+        symptoms = symptoms_data.lower()
     age = state["age"]
     hr = state["heart_rate"]
     bp = state["blood_pressure"]
@@ -48,14 +52,14 @@ def get_action(state):
 
     # vitals (HIGH IMPACT)
     if hr > 130 or hr < 45:
-        priority_score += 3
+        priority_score += 4
 
     if bp > 180 or bp < 80:
-        priority_score += 3
+        priority_score += 4
 
     # symptoms severity
     if any(x in symptoms for x in ["unconscious", "severe", "chest pain"]):
-        priority_score += 3
+        priority_score += 5
     elif any(x in symptoms for x in ["moderate", "pain", "fever"]):
         priority_score += 1
 
@@ -71,9 +75,13 @@ def get_action(state):
     else:
         priority = 1
 
-    if priority_score >= 4:
+    if priority_score >= 6:
+        seriousness = 5
+    elif priority_score >= 4:
+        seriousness = 4
+    elif priority_score >= 3:
         seriousness = 3
-    elif priority_score >= 2:
+    elif priority_score >= 1:
         seriousness = 2
     else:
         seriousness = 1
