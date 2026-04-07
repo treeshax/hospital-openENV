@@ -11,7 +11,18 @@ from PIL import Image
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from env.hospital_env import HospitalEnv
-from scripts.run_baseline import smart_agent
+from scripts.run_baseline import rl_agent, load_q_table
+
+load_q_table()
+
+# from inference import get_action
+# USE_RL = True
+
+
+# if USE_RL:
+#     action = rl_agent(state)
+# else:
+#     action = get_action(state)
 
 # Page Config
 st.set_page_config(
@@ -131,9 +142,7 @@ st.markdown("""
 
 # Session State Initialization
 if 'env' not in st.session_state:
-    with open('data/patients.json', 'r') as f:
-        patients_data = json.load(f)
-    st.session_state.env = HospitalEnv(data=patients_data)
+    st.session_state.env = HospitalEnv(task="medium", max_steps=20)
     st.session_state.history = []
     st.session_state.total_reward = 0
     st.session_state.patients_processed = 0
@@ -141,7 +150,7 @@ if 'env' not in st.session_state:
     st.session_state.beds_occupied = random.randint(30, 45)
     st.session_state.staff_total = 20
     st.session_state.staff_active = 15
-    st.session_state.queue = patients_data[:5]
+    st.session_state.queue = []
     st.session_state.latest_reward = 0
 
 # --- SIDEBAR & LOGO ---
@@ -220,7 +229,7 @@ with right_col:
     if st.button("Simulate Next Patient ⏩", type="primary", use_container_width=True):
         # Simulation Logic
         state = st.session_state.env.reset()
-        action = smart_agent(state)
+        action = rl_agent(state)
         next_state, reward, done, info = st.session_state.env.step(action)
         
         # Update State
@@ -232,7 +241,7 @@ with right_col:
         st.session_state.history.insert(0, {
             "ID": f"#{st.session_state.patients_processed}",
             "Symptoms": state['symptoms'],
-            "Agent Priority": action['priority'],
+            "Agent Priority": action['seriousness'],
             "Agent Dept": action['department'].capitalize(),
             "Outcome": "Matched" if reward > 0.5 else "Suboptimal",
             "Reward": f"{reward:+.2f}"

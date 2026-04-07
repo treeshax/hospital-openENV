@@ -1,6 +1,7 @@
 from env.hospital_env import HospitalEnv
 import random
 from collections import defaultdict
+import pickle
 
 # 🎯 All possible actions
 DEPARTMENTS = [
@@ -46,6 +47,7 @@ def choose_action(state, epsilon):
 
 # 🔁 TRAINING LOOP (FIXED ACCURACY)
 def train(env, episodes=500):
+    save_q_table()
 
     alpha = 0.1
     gamma = 0.95
@@ -189,3 +191,42 @@ if __name__ == "__main__":
 
     print("\n🧪 Testing trained agent...\n")
     test(env)
+
+    # ==============================
+# 🤖 RL AGENT (for inference/UI)
+# ==============================
+def rl_agent(state):
+    key = state_to_key(state)
+
+    # fallback if unseen state
+    if key not in Q:
+        from inference import get_action
+        return get_action(state)
+
+    q_values = Q[key]
+    best_idx = q_values.index(max(q_values))
+
+    dept, ser = ACTIONS[best_idx]
+
+    return {
+        "department": dept,
+        "seriousness": ser
+    }
+
+    # ==============================
+# 💾 SAVE / LOAD Q TABLE
+# ==============================
+
+def save_q_table(filename="q_table.pkl"):
+    with open(filename, "wb") as f:
+        pickle.dump(dict(Q), f)
+
+def load_q_table(filename="q_table.pkl"):
+    global Q
+    try:
+        with open(filename, "rb") as f:
+            data = pickle.load(f)
+            Q.update(data)
+        print("✅ Q-table loaded")
+    except FileNotFoundError:
+        print("⚠️ No Q-table found. Train first.")
