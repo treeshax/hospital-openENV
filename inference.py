@@ -4,7 +4,7 @@ MAX_STEPS = 20
 
 
 def get_action(state):
-    symptoms = state["symptoms"].lower()
+    symptoms = " ".join(state["symptoms"]).lower()
     age = state["age"]
     hr = state["heart_rate"]
     bp = state["blood_pressure"]
@@ -71,11 +71,18 @@ def get_action(state):
     else:
         priority = 1
 
+    if priority_score >= 4:
+        seriousness = 3
+    elif priority_score >= 2:
+        seriousness = 2
+    else:
+        seriousness = 1
+        
     return {
         "priority": priority,
-        "department": department
+        "department": department,
+        "seriousness": seriousness
     }
-
 
 def main():
     env = HospitalEnv(task="medium")
