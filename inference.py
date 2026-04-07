@@ -69,48 +69,45 @@ def fallback_policy(state):
 # ==============================
 def ask_llm(state):
     prompt = f"""
-You are a hospital triage system.
+    You are a STRICT hospital triage system.
 
-STRICT RULES:
-- Use "emergency" ONLY for:
-  - unconscious
-  - severe bleeding
+    You MUST follow these rules EXACTLY:
 
-- Use cardiology for:
-  - chest pain
-  - palpitations
+    CRITICAL RULES (highest priority):
+    - If "unconscious" OR "severe bleeding" → department = emergency, seriousness = 5
+    - If BOTH "chest pain" AND "shortness of breath" → department = cardiology, seriousness = 5
 
-- Use pulmonology for:
-  - shortness of breath
-  - cough
+    DEPARTMENT RULES:
+    - chest pain OR palpitations → cardiology
+    - shortness of breath OR cough → pulmonology
+    - head injury OR dizziness → neurology
+    - fracture → orthopedics
+    - fever → general
 
-- Use neurology for:
-  - head injury
-  - dizziness
+    SCORING PRIORITY:
+    - Emergency overrides EVERYTHING
+    - Multi-symptom conflicts → choose MOST SEVERE condition
+    - If multiple serious symptoms → increase seriousness
 
-- Use orthopedics for:
-  - fracture
+    SERIOUSNESS RULES:
+    - 5 → life-threatening (unconscious, bleeding, chest pain + breath)
+    - 4 → severe (fracture + other symptoms, strong vitals)
+    - 3 → moderate
+    - 2 → mild
+    - 1 → very mild
 
-- Use general for:
-  - fever or mild symptoms
+    Patient:
+    Symptoms: {state['symptoms']}
+    Age: {state['age']}
+    Heart Rate: {state['heart_rate']}
+    Blood Pressure: {state['blood_pressure']}
 
-Seriousness:
-1-2 → mild
-3 → moderate
-4-5 → severe
-
-Patient:
-Symptoms: {state['symptoms']}
-Age: {state['age']}
-Heart Rate: {state['heart_rate']}
-Blood Pressure: {state['blood_pressure']}
-
-Return ONLY JSON:
-{{
-  "department": "...",
-  "seriousness": <1-5>
-}}
-"""
+    Return ONLY JSON:
+    {{
+    "department": "...",
+    "seriousness": <1-5>
+    }}
+    """
 
     try:
         response = client.chat.completions.create(
