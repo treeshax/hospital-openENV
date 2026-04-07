@@ -1,9 +1,5 @@
 assets/
-<<<<<<< HEAD
 *.png
 .env
 __pycache__/
 *.pyc
-=======
-*.png
->>>>>>> 2d75043a3371465e0910a5a6d1456de13c2a346a
