@@ -149,7 +149,7 @@ def run():
         # ==========================
         # your env gives roughly -3 → +5
         reward = (reward + 3) / 8
-        reward = max(0.001, min(0.999, reward))
+        reward = max(0.0, min(1.0, reward))
 
         total_reward += reward
         steps += 1
