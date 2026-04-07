@@ -9,14 +9,120 @@ pinned: false
 
 # Smart Hospital: RL Management Dashboard
 
-A Reinforcement Learning (RL) powered simulation dashboard designed to optimize hospital resource allocation and patient triage. This project transitions complex RL decision logic into a visual, interactive experience for monitoring agent performance and hospital resource impact.
+🏥 Smart Hospital: Adaptive Triage & Resource Optimization Environment
 
-## 🚀 Overview
+Smart Hospital is a real-world reinforcement learning environment designed to simulate hospital triage and resource allocation under uncertainty.
 
-The system simulates a hospital environment where an RL agent (or rule-based baseline) is responsible for:
-1. **Triage**: Assigning priority levels to incoming patients based on symptoms and vitals.
-2. **Allocation**: Directing patients to the most appropriate departments (Cardiology, Neurology, General).
-3. **Resource Management**: Monitoring the impact of these decisions on hospital beds and staff availability.
+Unlike traditional rule-based systems, this environment challenges AI agents to make high-stakes decisions where incorrect prioritization can lead to severe penalties—mirroring real clinical trade-offs.
+
+---
+
+### 🚨 Problem
+
+Modern hospitals face:
+
+- Overcrowded emergency departments
+- Limited staff and critical care resources
+- High variability in patient severity
+- Risk of under-triaging critical patients or overloading specialists
+
+Current systems rely heavily on static triage protocols, which struggle under dynamic and uncertain conditions.
+
+---
+
+### 💡 Our Approach
+
+We model hospital triage as a sequential decision-making problem, where an agent must:
+
+- Assign patients to the correct department
+- Estimate urgency (seriousness)
+- Balance risk vs resource utilization
+- Handle multi-symptom ambiguity
+- Avoid critical misclassification penalties
+
+---
+
+### 🧠 Why Reinforcement Learning?
+
+This is not just classification.
+
+Agents must optimize:
+
+- Long-term reward across multiple patients
+- Trade-offs between accuracy and safety
+- Risk-sensitive decisions (e.g., missing emergencies)
+- Performance under distribution shifts (easy → hard tasks)
+
+This makes RL a natural fit for:
+
+- Adaptive triage policies
+- Robust decision-making under uncertainty
+- Learning from simulated clinical environments
+
+----
+
+## ⚙️ Environment Design
+
+###  Observation Space
+- Symptoms (multi-label)
+- Age and vitals (normalized)
+- Risk indicators (derived features)
+- Task difficulty and progression
+
+###  Action Space
+- Department selection (6 specialties)
+- Seriousness level (1–5)
+
+###  Reward System
+- Partial credit for near-correct decisions
+- Heavy penalties for critical misclassification
+- Risk-aware shaping based on vitals and age
+
+---
+
+## 📊 Tasks
+
+| Task   | Objective                              |
+|--------|----------------------------------------|
+| Easy   | Department prediction                  |
+| Medium | Department + seriousness               |
+| Hard   | Full triage with risk-aware penalties  |
+
+---
+
+## 🤖 Baseline Agent
+
+We provide a hybrid agent combining:
+
+- Rule-based medical priors  
+- LLM-based reasoning  
+- Fallback safety policies  
+
+This ensures robustness even under API or model failures.
+
+---
+
+## 🧪 Evaluation
+
+Agents are evaluated on:
+
+- Accuracy across tasks  
+- Risk-sensitive decision quality  
+- Stability under uncertainty  
+- Final normalized score (0–1)  
+
+
+## 🌍 Real-World Impact
+
+This system is designed as a **decision-support layer**, not a replacement for clinicians.
+
+### Potential Applications:
+- Emergency triage assistance  
+- Hospital load balancing simulations  
+- Training environments for AI in healthcare  
+- Stress-testing healthcare policies under demand spikes  
+
+---
 
 ## 🛠️ Technologies Used
 
