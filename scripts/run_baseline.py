@@ -24,11 +24,18 @@ Q = defaultdict(lambda: [0] * len(ACTIONS))
 
 # Improved state representation
 def state_to_key(state):
+    symptoms = tuple(sorted(state["symptoms"]))
+
+    # 🔥 risk-based abstraction
+    high_hr = state["heart_rate"] > 0.6
+    low_bp = state["blood_pressure"] < 0.5
+    elderly = state["age"] > 0.6
+
     return (
-        tuple(sorted(state["symptoms"])),   # ✅ fixed list issue
-        state["age"] // 10,
-        state["heart_rate"] // 10,
-        state["blood_pressure"] // 10
+        symptoms,
+        high_hr,
+        low_bp,
+        elderly
     )
 
 
@@ -47,14 +54,14 @@ def choose_action(state, epsilon):
 
 # TRAINING LOOP
 def train(env, episodes=500):
-    save_q_table()
+    # save_q_table()
 
-    alpha = 0.1
+    alpha = 0.2
     gamma = 0.95
 
     epsilon = 1.0
-    epsilon_min = 0.05
-    epsilon_decay = 0.995
+    epsilon_min = 0.01
+    epsilon_decay = 0.99
 
     for ep in range(episodes):
         state = env.reset()
@@ -84,8 +91,8 @@ def train(env, episodes=500):
             total_reward += reward
 
             # 🔥 stronger learning from mistakes
-            if reward < 0:
-                reward *= 2
+            # if reward < 0:
+            #     reward *= 2
 
             # ✅ correct evaluation (NOT using env accuracy)
             dept_correct = action_dict["department"] == info["true_department"]
@@ -169,12 +176,14 @@ def test(env):
 
         step_score = (dept_correct + ser_correct) / 2
         total_score += step_score
+        
 
         print(f"\nREWARD: {reward}")
         print(f"TRUE DEPARTMENT: {info['true_department']}")
         print(f"TRUE SERIOUSNESS: {info['true_seriousness']}")
         print(f"Dept Correct: {dept_correct}")
         print(f"Seriousness Correct: {ser_correct}")
+        print(f"STEP ACCURACY: {step_score:.2f}")
         print(f"RUNNING ACCURACY: {total_score/total:.2f}")
         print("-" * 40)
 
@@ -184,10 +193,10 @@ def test(env):
 # MAIN
 if __name__ == "__main__":
 
-    env = HospitalEnv(task="hard", max_steps=20)
+    env = HospitalEnv(task="hard", max_steps=10)
 
-    print("Training started...\n")
-    train(env, episodes=50)
+    print("🚀 Training started...\n")
+    train(env, episodes=5000)
 
     print("\nTesting trained agent...\n")
     test(env)

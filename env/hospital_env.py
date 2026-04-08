@@ -10,7 +10,7 @@ from env.tasks import (
 
 class HospitalEnv:
 
-    def __init__(self, task="easy", max_steps=20):
+    def __init__(self, task="easy", max_steps=10):
         self.task = task
         self.max_steps = max_steps
 

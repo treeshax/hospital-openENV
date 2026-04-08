@@ -3,11 +3,13 @@ from fastapi.responses import HTMLResponse
 from env.hospital_env import HospitalEnv
 import uvicorn
 import random
+from inference import ask_llm 
 
 app = FastAPI()
 
 
 # HOME UI
+
 @app.get("/", response_class=HTMLResponse)
 def home():
     return """
@@ -21,9 +23,7 @@ def home():
             <p>Interactive triage simulation</p>
             </div>
             <button onclick="runDemo()">▶️ Run Simulation</button>
-
             <pre id="output" style="margin-top:20px; background:#111; color:#0f0; padding:10px;"></pre>
-
             <script>
                 async function runDemo() {
                     const res = await fetch('/demo');
@@ -36,7 +36,7 @@ def home():
     """
 
 
-# RESET
+# RESET (validator)
 @app.post("/reset")
 def reset():
     env = HospitalEnv(task="easy", max_steps=1)
@@ -53,21 +53,7 @@ def demo():
     steps = []
 
     for step in range(5):
-        # simple heuristic (same as fallback)
-        symptoms = " ".join(state["symptoms"]).lower()
-
-        if "unconscious" in symptoms or "severe bleeding" in symptoms:
-            action = {"department": "emergency", "seriousness": 5}
-        elif "chest pain" in symptoms:
-            action = {"department": "cardiology", "seriousness": 4}
-        elif "shortness of breath" in symptoms:
-            action = {"department": "pulmonology", "seriousness": 3}
-        elif "head injury" in symptoms or "dizziness" in symptoms:
-            action = {"department": "neurology", "seriousness": 3}
-        elif "fracture" in symptoms:
-            action = {"department": "orthopedics", "seriousness": 3}
-        else:
-            action = {"department": "general", "seriousness": 2}
+        action = ask_llm(state)   # 🔥 USE LLM HERE
 
         next_state, reward, done, info = env.step(action)
 
@@ -85,7 +71,7 @@ def demo():
     return {"simulation": steps}
 
 
-# ENTRYPOINT
+# ENTRYPOINT (required)
 def main():
     return app
 

@@ -133,7 +133,7 @@ st.markdown("""
 # Session State Initialization
 if 'env' not in st.session_state:
     # patients_data = json.load(f)
-    st.session_state.env = HospitalEnv(task="medium", max_steps=20)
+    st.session_state.env = HospitalEnv(task="medium", max_steps=10)
     st.session_state.history = []
     st.session_state.total_reward = 0
     st.session_state.patients_processed = 0
