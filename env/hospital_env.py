@@ -78,9 +78,9 @@ class HospitalEnv:
     # 🏥 NEW: PROCESS PATIENTS (simulate treatment)
     def process_patients(self):
         for dept in self.department_queues:
-            if self.department_queues[dept]:
-                self.department_queues[dept].pop(0)  # remove highest priority
-
+        # process only sometimes
+            if self.department_queues[dept] and random.random() < 0.3:
+                self.department_queues[dept].pop(0)
     # 🏥 NEW: QUEUE STATUS
     def get_queue_status(self):
         status = {}
@@ -129,7 +129,7 @@ class HospitalEnv:
         )
 
         # 🏥 simulate treatment
-        self.process_patients()
+        # self.process_patients()
 
         done = (len(self.queue) == 0) or (self.current_step >= self.max_steps)
 
