@@ -1,29 +1,29 @@
-# 🟢 EASY → department only (but better signal)
+# 🟢 EASY → department only (with penalty)
 def easy_task_reward(patient, action):
     if action["department"] == patient.department:
-        return 1
+        return 1.0
     else:
-        return -0.5  # ❗ penalize wrong
+        return -0.5
 
 
-# 🟡 MEDIUM → department + seriousness (with closeness)
+# 🟡 MEDIUM → department + seriousness (graded)
 def medium_task_reward(patient, action):
-    reward = 0
+    reward = 0.0
 
-    # ✅ Department (important)
+    # ✅ Department (primary signal)
     if action["department"] == patient.department:
-        reward += 1
+        reward += 1.0
     else:
         reward -= 0.5
 
-    # ✅ Seriousness (graded reward)
+    # ✅ Seriousness (graded learning)
     true = patient.true_seriousness
     pred = action["seriousness"]
 
     diff = abs(true - pred)
 
     if diff == 0:
-        reward += 1
+        reward += 1.0
     elif diff == 1:
         reward += 0.5
     elif diff == 2:
@@ -34,48 +34,62 @@ def medium_task_reward(patient, action):
     return reward
 
 
-# 🔴 HARD → full intelligent reward
+# 🔴 HARD → realistic + safety-aware reward
 def hard_task_reward(patient, action):
-    reward = 0
+    reward = 0.0
 
     true = patient.true_seriousness
     pred = action["seriousness"]
 
-    # ✅ Department
+    # =========================
+    # 🎯 Department (high weight)
+    # =========================
     if action["department"] == patient.department:
-        reward += 1
+        reward += 1.5
     else:
-        reward -= 1  # stronger penalty
+        reward -= 1.0
 
-    # ✅ Seriousness (graded)
+    # =========================
+    # 🎯 Seriousness (graded)
+    # =========================
     diff = abs(true - pred)
 
     if diff == 0:
-        reward += 1.5
+        reward += 2.0
     elif diff == 1:
-        reward += 1
+        reward += 1.2
     elif diff == 2:
-        reward += 0.3
+        reward += 0.5
     else:
-        reward -= 1
+        reward -= 1.0
 
-    # 🔥 CRITICAL SAFETY LOGIC (VERY IMPORTANT)
-    # Missed emergency
+    # =========================
+    # 🔥 CRITICAL SAFETY LOGIC
+    # =========================
+    # Missing severe case
     if true == 5 and pred <= 2:
-        reward -= 2
+        reward -= 3.0
 
-    # Overreaction penalty (optional realism)
+    # Overreaction (less critical but still penalized)
     if true <= 2 and pred == 5:
         reward -= 0.5
 
-    # 🔥 Risk-based bonus (use vitals indirectly)
+    # =========================
+    # 🧠 RISK-AWARE BONUS
+    # =========================
     if patient.heart_rate > 120 and pred >= 4:
-        reward += 0.3
+        reward += 0.5
 
     if patient.blood_pressure < 90 and pred >= 4:
-        reward += 0.3
+        reward += 0.5
 
     if patient.age > 70 and pred >= 3:
-        reward += 0.2
+        reward += 0.3
+
+    # =========================
+    # 🎯 PERFECT DECISION BONUS
+    # =========================
+    if action["department"] == patient.department and diff == 0:
+        reward += 1.0
 
     return reward
