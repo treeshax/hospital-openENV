@@ -7,6 +7,8 @@ from env.tasks import (
     hard_task_reward
 )
 
+from collections import defaultdict   # ✅ NEW
+
 
 class HospitalEnv:
 
@@ -21,6 +23,9 @@ class HospitalEnv:
         self.correct = 0
         self.total = 0
 
+        # 🏥 NEW: department-wise queues
+        self.department_queues = defaultdict(list)
+
     # RESET ENVIRONMENT
     def reset(self):
         import random
@@ -31,6 +36,9 @@ class HospitalEnv:
         self.current_step = 0
         self.correct = 0
         self.total = 0
+
+        # 🧹 NEW: reset queues
+        self.department_queues.clear()
 
         self.patient = self.queue.pop(0)
 
@@ -67,6 +75,24 @@ class HospitalEnv:
             if key not in action_dict:
                 raise ValueError(f"Missing key in action: {key}")
 
+    # 🏥 NEW: PROCESS PATIENTS (simulate treatment)
+    def process_patients(self):
+        for dept in self.department_queues:
+            if self.department_queues[dept]:
+                self.department_queues[dept].pop(0)  # remove highest priority
+
+    # 🏥 NEW: QUEUE STATUS
+    def get_queue_status(self):
+        status = {}
+
+        for dept, patients in self.department_queues.items():
+            status[dept] = {
+                "total": len(patients),
+                "seriousness_levels": [p["seriousness"] for p in patients]
+            }
+
+        return status
+
     # STEP FUNCTION
     def step(self, action_dict):
         self._validate_action(action_dict)
@@ -75,6 +101,7 @@ class HospitalEnv:
 
         # reward
         reward = self._get_reward(self.patient, action.model_dump())
+
         if action_dict["department"] == self.patient.department:
             reward += 1
             self.correct += 1
@@ -85,6 +112,24 @@ class HospitalEnv:
         self.current_step += 1
 
         current_patient = self.patient
+
+        # 🏥 NEW: ADD PATIENT TO DEPARTMENT QUEUE
+        dept = action_dict["department"]
+        ser = action_dict["seriousness"]
+
+        self.department_queues[dept].append({
+            "patient": current_patient,
+            "seriousness": ser
+        })
+
+        # 🔥 PRIORITY SORT (highest seriousness first)
+        self.department_queues[dept].sort(
+            key=lambda x: x["seriousness"],
+            reverse=True
+        )
+
+        # 🏥 simulate treatment
+        self.process_patients()
 
         done = (len(self.queue) == 0) or (self.current_step >= self.max_steps)
 
@@ -101,7 +146,10 @@ class HospitalEnv:
             "agent_action": action_dict,
             "accuracy": self.correct / self.total if self.total > 0 else 0,
             "step": self.current_step,
-            "reward": reward
+            "reward": reward,
+
+            # 🏥 NEW: queue snapshot
+            "queue_status": self.get_queue_status()
         }
 
         return next_state, reward, done, info
