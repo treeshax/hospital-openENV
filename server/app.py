@@ -3,6 +3,7 @@ from fastapi.responses import HTMLResponse
 from env.hospital_env import HospitalEnv
 import uvicorn
 import random
+from inference import ask_llm  # reuse your LLM logic
 
 app = FastAPI()
 
@@ -51,6 +52,7 @@ def reset():
 # ==============================
 # 🎮 DEMO SIMULATION
 # ==============================
+
 @app.get("/demo")
 def demo():
     env = HospitalEnv(task="hard", max_steps=5)
@@ -59,21 +61,7 @@ def demo():
     steps = []
 
     for step in range(5):
-        # simple heuristic (same as fallback)
-        symptoms = " ".join(state["symptoms"]).lower()
-
-        if "unconscious" in symptoms or "severe bleeding" in symptoms:
-            action = {"department": "emergency", "seriousness": 5}
-        elif "chest pain" in symptoms:
-            action = {"department": "cardiology", "seriousness": 4}
-        elif "shortness of breath" in symptoms:
-            action = {"department": "pulmonology", "seriousness": 3}
-        elif "head injury" in symptoms or "dizziness" in symptoms:
-            action = {"department": "neurology", "seriousness": 3}
-        elif "fracture" in symptoms:
-            action = {"department": "orthopedics", "seriousness": 3}
-        else:
-            action = {"department": "general", "seriousness": 2}
+        action = ask_llm(state)   # 🔥 USE LLM HERE
 
         next_state, reward, done, info = env.step(action)
 
