@@ -138,7 +138,7 @@ def run():
 
             # normalize reward → [0,1]
             reward = (reward + 3) / 8
-            reward = max(0.0, min(1.0, reward))
+            reward = max(0.001, min(0.999, reward))
 
             rewards.append(reward)
             total_reward += reward
@@ -166,7 +166,7 @@ def run():
         # FINAL SCORE
         steps_taken = len(rewards)
         score = total_reward / steps_taken if steps_taken > 0 else 0.0
-        score = max(0.0, min(1.0, score))
+        score = max(0.001, min(0.999, score))
 
         success = score >= 0.5
 
