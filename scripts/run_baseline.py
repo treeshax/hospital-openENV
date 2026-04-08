@@ -176,13 +176,15 @@ def test(env):
 
         step_score = (dept_correct + ser_correct) / 2
         total_score += step_score
+        
 
         print(f"\nREWARD: {reward}")
         print(f"TRUE DEPARTMENT: {info['true_department']}")
         print(f"TRUE SERIOUSNESS: {info['true_seriousness']}")
         print(f"Dept Correct: {dept_correct}")
         print(f"Seriousness Correct: {ser_correct}")
-        print(f"\n✅ FINAL ACCURACY: {total_score/total:.2f}")
+        print(f"STEP ACCURACY: {step_score:.2f}")
+        print(f"RUNNING ACCURACY: {total_score/total:.2f}")
         print("-" * 40)
 
         step_num += 1
