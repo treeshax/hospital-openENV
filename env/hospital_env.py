@@ -112,8 +112,8 @@ class HospitalEnv:
         # ✅ Department correctness
         # ==============================
         if action_dict["department"] == current_patient.department:
-            reward += 1
-            self.correct += 1
+            reward += 2
+            self.correct += 2
         else:
             reward -= 1
 
