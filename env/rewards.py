@@ -7,7 +7,7 @@ def compute_reward(patient, action):
     true_dep = patient.department
     pred_dep = action["department"]
 
-    # 🎯 1. Seriousness reward (with gradient)
+    # Seriousness reward (with gradient)
     diff = abs(true_ser - pred_ser)
 
     if diff == 0:

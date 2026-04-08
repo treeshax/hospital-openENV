@@ -221,7 +221,7 @@ with left_col:
         for p in st.session_state.env.patients:
             st.markdown(f"""
             <div class="patient-item">
-                👤 <b>Patient (Age {p.age})</b><br>
+                 <b>Patient (Age {p.age})</b><br>
                 <span style="font-size: 0.9rem;">{p.symptoms}</span>
             </div>
             """, unsafe_allow_html=True)
@@ -233,15 +233,15 @@ with left_col:
 with right_col:
     st.subheader("🦾 Agent Workbench")
     
-    if st.button("Simulate Next Patient ⏩", type="primary", use_container_width=True):
+    if st.button("Simulate Next Patient", type="primary", use_container_width=True):
 
-        # 🔥 Initialize state only once
+        # Initialize state only once
         if "current_state" not in st.session_state:
             st.session_state.current_state = st.session_state.env.reset()
 
         state = st.session_state.current_state
 
-        # 🔥 Safe agent execution
+        # Safe agent execution
         try:
             if mode == "LLM Agent":
                 action = get_action(state)
@@ -299,7 +299,7 @@ with right_col:
 
     # History Table
     if st.session_state.history:
-        st.markdown("### 📋 Activity Log")
+        st.markdown("### Activity Log")
         df = pd.DataFrame(st.session_state.history)
         st.dataframe(df, use_container_width=True, hide_index=True)
 

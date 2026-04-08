@@ -9,7 +9,7 @@ class Patient(BaseModel):
     heart_rate: int = Field(..., ge=30, le=220)
     blood_pressure: int = Field(..., ge=50, le=200)
 
-    # 🔥 ADD THESE (CRITICAL)
+    # ADD THESE (CRITICAL)
     true_seriousness: Literal[1, 2, 3, 4, 5]
     department: Literal[
         "cardiology",
