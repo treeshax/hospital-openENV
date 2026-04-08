@@ -110,16 +110,15 @@ class HospitalEnv:
 
         if diff == 0:
             reward += 2
-            step_correct += 1
         elif diff == 1:
-            reward += 1
+            reward += 1.2
         elif diff == 2:
-            reward += 0.3
+            reward += 0.5
         else:
-            reward -= 1
+            reward -= 1.5
 
         # CRITICAL SAFETY PENALTY
-        if true_ser == 5 and pred_ser <= 2:
+        if true_ser >=4 and pred_ser <= 2:
             reward -= 2
 
         # OVERREACTION PENALTY

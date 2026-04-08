@@ -24,15 +24,23 @@ Q = defaultdict(lambda: [0] * len(ACTIONS))
 def state_to_key(state):
     symptoms = tuple(sorted(state["symptoms"]))
 
+    #  bucket features
     hr_bucket = int(state["heart_rate"] * 10)
     bp_bucket = int(state["blood_pressure"] * 10)
     age_bucket = int(state["age"] * 10)
+
+    #  NEW: critical symptom detection
+    critical_symptoms = any(
+        s in ["unconscious", "severe bleeding"]
+        for s in state["symptoms"]
+    )
 
     return (
         symptoms,
         hr_bucket,
         bp_bucket,
-        age_bucket
+        age_bucket,
+        critical_symptoms
     )
 
 
@@ -45,6 +53,10 @@ def choose_action(state, epsilon):
     else:
         q_values = Q[key]
         action_idx = q_values.index(max(q_values))
+    #  bias toward higher seriousness if risky
+    if state["heart_rate"] > 0.7 or state["blood_pressure"] < 0.4:
+        if random.random() < 0.3:
+            return ("emergency", 5), ACTIONS.index(("emergency", 5))
 
     return ACTIONS[action_idx], action_idx
 
@@ -101,7 +113,7 @@ def train(env, episodes=5000):
             if queue_correct:
                 correct_queue += 1
 
-            step_score = (dept_correct + ser_correct + queue_correct) / 3
+            step_score = (0.4* dept_correct + 0.4* ser_correct + 0.4 *queue_correct) / 3
             total_score += step_score
 
             # Q-learning update
