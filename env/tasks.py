@@ -1,4 +1,4 @@
-# 🟢 EASY → department only (with penalty)
+# EASY → department only (with penalty)
 def easy_task_reward(patient, action):
     if action["department"] == patient.department:
         return 1.0
@@ -6,17 +6,17 @@ def easy_task_reward(patient, action):
         return -0.5
 
 
-# 🟡 MEDIUM → department + seriousness (graded)
+# MEDIUM → department + seriousness (graded)
 def medium_task_reward(patient, action):
     reward = 0.0
 
-    # ✅ Department (primary signal)
+    # Department 
     if action["department"] == patient.department:
         reward += 1.0
     else:
         reward -= 0.5
 
-    # ✅ Seriousness (graded learning)
+    # Seriousness 
     true = patient.true_seriousness
     pred = action["seriousness"]
 
@@ -34,7 +34,7 @@ def medium_task_reward(patient, action):
     return reward
 
 
-# 🔴 HARD → realistic + safety-aware reward
+#  HARD → realistic + safety-aware reward
 def hard_task_reward(patient, action):
     reward = 0.0
 
