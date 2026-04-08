@@ -49,9 +49,9 @@ def hard_task_reward(patient, action):
     else:
         reward -= 1.0
 
-    # =========================
-    # 🎯 Seriousness (graded)
-    # =========================
+    
+    # Seriousness (graded)
+   
     diff = abs(true - pred)
 
     if diff == 0:
@@ -63,9 +63,9 @@ def hard_task_reward(patient, action):
     else:
         reward -= 1.0
 
-    # =========================
-    # 🔥 CRITICAL SAFETY LOGIC
-    # =========================
+
+    # CRITICAL SAFETY LOGIC
+
     # Missing severe case
     if true == 5 and pred <= 2:
         reward -= 3.0
@@ -74,9 +74,9 @@ def hard_task_reward(patient, action):
     if true <= 2 and pred == 5:
         reward -= 0.5
 
-    # =========================
-    # 🧠 RISK-AWARE BONUS
-    # =========================
+ 
+    # RISK-AWARE BONUS
+
     if patient.heart_rate > 120 and pred >= 4:
         reward += 0.5
 
@@ -86,9 +86,9 @@ def hard_task_reward(patient, action):
     if patient.age > 70 and pred >= 3:
         reward += 0.3
 
-    # =========================
-    # 🎯 PERFECT DECISION BONUS
-    # =========================
+   
+    #  PERFECT DECISION BONUS
+
     if action["department"] == patient.department and diff == 0:
         reward += 1.0
 
