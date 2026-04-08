@@ -47,7 +47,7 @@ def choose_action(state, epsilon):
 
 # 🔁 TRAINING LOOP (FIXED ACCURACY)
 def train(env, episodes=500):
-    save_q_table()
+    # save_q_table()
 
     alpha = 0.1
     gamma = 0.95
