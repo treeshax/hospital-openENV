@@ -14,18 +14,19 @@ DEPARTMENTS = [
 ]
 
 SERIOUSNESS = [1, 2, 3, 4, 5]
-
 ACTIONS = [(d, s) for d in DEPARTMENTS for s in SERIOUSNESS]
 
 # Q-TABLE
 Q = defaultdict(lambda: [0] * len(ACTIONS))
 
+
+# ==============================
 # STATE ENCODING
+# ==============================
 def state_to_key(state):
     symptoms = tuple(sorted(state["symptoms"]))
 
-    # 🎯 bucket instead of boolean
-    hr_bucket = int(state["heart_rate"] * 10)   # 0–10
+    hr_bucket = int(state["heart_rate"] * 10)
     bp_bucket = int(state["blood_pressure"] * 10)
     age_bucket = int(state["age"] * 10)
 
@@ -35,8 +36,10 @@ def state_to_key(state):
         bp_bucket,
         age_bucket
     )
+
+
 # ==============================
-# 🎯 ACTION SELECTION
+# ACTION SELECTION
 # ==============================
 def choose_action(state, epsilon):
     key = state_to_key(state)
@@ -49,16 +52,18 @@ def choose_action(state, epsilon):
 
     return ACTIONS[action_idx], action_idx
 
+
+# ==============================
 # TRAINING LOOP
-def train(env, episodes=500):
-    # save_q_table()
+# ==============================
+def train(env, episodes=5000):
 
     alpha = 0.2
     gamma = 0.95
 
     epsilon = 1.0
     epsilon_min = 0.01
-    epsilon_decay = 0.99
+    epsilon_decay = 0.98
 
     for ep in range(episodes):
         state = env.reset()
@@ -66,7 +71,6 @@ def train(env, episodes=500):
 
         total_reward = 0
 
-        # ✅ accuracy tracking
         correct_department = 0
         correct_seriousness = 0
         correct_queue = 0
@@ -85,12 +89,16 @@ def train(env, episodes=500):
 
             next_state, reward, done, info = env.step(action_dict)
 
+            # 🔥 IMPORTANT FIX: reward shaping
+            if reward < 0:
+                reward *= 1.5
+
             total += 1
             total_reward += reward
 
             dept_correct = action_dict["department"] == info["true_department"]
             ser_correct = action_dict["seriousness"] == info["true_seriousness"]
-            queue_correct = info["queue_correct"]
+            queue_correct = info.get("queue_correct", False)
 
             if dept_correct:
                 correct_department += 1
@@ -99,7 +107,6 @@ def train(env, episodes=500):
             if queue_correct:
                 correct_queue += 1
 
-            # 🔥 NEW: include queue in score
             step_score = (dept_correct + ser_correct + queue_correct) / 3
             total_score += step_score
 
@@ -124,7 +131,10 @@ def train(env, episodes=500):
             f"Epsilon: {epsilon:.2f}"
         )
 
+
+# ==============================
 # TEST FUNCTION
+# ==============================
 def test(env):
     state = env.reset()
     done = False
@@ -159,10 +169,8 @@ def test(env):
         print(f"Department: {action['department']}")
         print(f"Seriousness: {action['seriousness']}")
 
-        # take step
         state, reward, done, info = env.step(action)
 
-        #  show ONLY selected department queue
         selected_dept = action["department"]
         q_info = info["queue_status"].get(selected_dept, {
             "total": 0,
@@ -174,7 +182,7 @@ def test(env):
 
         dept_correct = action["department"] == info["true_department"]
         ser_correct = action["seriousness"] == info["true_seriousness"]
-        queue_correct = info["queue_correct"]
+        queue_correct = info.get("queue_correct", False)
 
         total += 1
 
@@ -200,60 +208,60 @@ def test(env):
 
         step_num += 1
 
-    # FINAL RESULTS
     print("\n📊 FINAL RESULTS:")
     print(f"Department Accuracy: {correct_department/total:.2f}")
     print(f"Seriousness Accuracy: {correct_seriousness/total:.2f}")
     print(f"Queue Accuracy: {correct_queue/total:.2f}")
     print(f"Overall Accuracy: {total_score/total:.2f}")
 
+
+# ==============================
 # MAIN
+# ==============================
 if __name__ == "__main__":
+
     env = HospitalEnv(task="hard", max_steps=10)
 
     print("🚀 Training started...\n")
-    train(env, episodes=5000)
+    train(env, episodes=10000)   # 🔥 increased
 
     print("\n🧪 Testing trained agent...\n")
     test(env)
 
-# RL AGENT (for inference/UI)
 
+# ==============================
+# RL AGENT (FIXED)
+# ==============================
 def rl_agent(state):
     key = state_to_key(state)
 
-    # fallback if unseen state
-    if key not in Q:
-        symptoms = " ".join(state.get("symptoms", [])).lower()
+    # ✅ if seen → use Q
+    if key in Q:
+        q_values = Q[key]
+        best_idx = q_values.index(max(q_values))
+        dept, ser = ACTIONS[best_idx]
+        return {"department": dept, "seriousness": ser}
 
-        if "unconscious" in symptoms or "severe bleeding" in symptoms:
-            return {"department": "emergency", "seriousness": 5}
+    # ✅ fallback rules
+    symptoms = " ".join(state.get("symptoms", [])).lower()
 
+    if "unconscious" in symptoms or "severe bleeding" in symptoms:
+        return {"department": "emergency", "seriousness": 5}
     if "chest pain" in symptoms:
         return {"department": "cardiology", "seriousness": 4}
-
     if "shortness of breath" in symptoms:
         return {"department": "pulmonology", "seriousness": 3}
-
     if "head injury" in symptoms or "dizziness" in symptoms:
         return {"department": "neurology", "seriousness": 3}
-
     if "fracture" in symptoms:
         return {"department": "orthopedics", "seriousness": 3}
 
     return {"department": "general", "seriousness": 2}
 
-    q_values = Q[key]
-    best_idx = q_values.index(max(q_values))
 
-    dept, ser = ACTIONS[best_idx]   
-
-    return {
-        "department": dept,
-        "seriousness": ser
-    }
-
-# SAVE / LOAD Q TABLE
+# ==============================
+# SAVE / LOAD
+# ==============================
 def save_q_table(filename="q_table.pkl"):
     with open(filename, "wb") as f:
         pickle.dump(dict(Q), f)
