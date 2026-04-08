@@ -17,10 +17,11 @@ def home():
         <head>
             <title>Smart Hospital Demo</title>
         </head>
-        <body style="font-family: Arial; padding: 20px; text-align: center;">
+        <body style="font-family: Arial; padding: 20px;">
+        <div style="text-align: center;">
             <h1>Smart Hospital RL Environment 🏥</h1>
             <p>Interactive triage simulation</p>
-
+            </div>
             <button onclick="runDemo()">▶️ Run Simulation</button>
 
             <pre id="output" style="margin-top:20px; background:#111; color:#0f0; padding:10px;"></pre>
