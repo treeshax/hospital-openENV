@@ -1,0 +1,22 @@
+[project]
+name = "hospital-openenv"
+version = "0.1.0"
+description = "Smart Hospital RL Environment for triage and resource allocation"
+authors = [
+    { name = "Abhinav Singh" },
+    { name = "Vanshika Soni" },
+    { name = "Harshita Jain" }
+]
+dependencies = [
+    "pydantic",
+    "numpy",
+    "fastapi",
+    "uvicorn",
+    "openenv-core>=0.2.0"
+]
+
+[project.scripts]
+server = "server.app:main"
+
+[tool.openenv]
+env = "env.hospital_env:HospitalEnv"
