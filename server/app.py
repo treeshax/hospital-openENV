@@ -24,9 +24,7 @@ def home():
             <p>Interactive triage simulation</p>
             </div>
             <button onclick="runDemo()">▶️ Run Simulation</button>
-
             <pre id="output" style="margin-top:20px; background:#111; color:#0f0; padding:10px;"></pre>
-
             <script>
                 async function runDemo() {
                     const res = await fetch('/demo');
