@@ -24,11 +24,18 @@ Q = defaultdict(lambda: [0] * len(ACTIONS))
 
 # 🔑 Improved state representation
 def state_to_key(state):
+    symptoms = tuple(sorted(state["symptoms"]))
+
+    # 🔥 risk-based abstraction
+    high_hr = state["heart_rate"] > 0.6
+    low_bp = state["blood_pressure"] < 0.5
+    elderly = state["age"] > 0.6
+
     return (
-        tuple(sorted(state["symptoms"])),   # ✅ fixed list issue
-        state["age"] // 10,
-        state["heart_rate"] // 10,
-        state["blood_pressure"] // 10
+        symptoms,
+        high_hr,
+        low_bp,
+        elderly
     )
 
 
