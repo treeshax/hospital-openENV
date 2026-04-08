@@ -1,3 +1,5 @@
+from logging import info
+
 from env.hospital_env import HospitalEnv
 import random
 from collections import defaultdict
@@ -167,8 +169,13 @@ def test(env):
 
         # ✅ NOW PRINT QUEUE (correct position)
         print("\n🏥 QUEUE STATUS:")
-        for dept_name, q_info in info["queue_status"].items():
-            print(f"{dept_name}: {q_info['total']} | Severity: {q_info['seriousness_levels']}")
+        print("\n🏥 SELECTED DEPARTMENT QUEUE:")
+        selected_dept = action["department"]
+        q_info = info["queue_status"].get(selected_dept, {
+        "total": 0,
+        "seriousness_levels": []
+    })
+        print(f"{selected_dept}: {q_info['total']} | Severity: {q_info['seriousness_levels']}")
 
         dept_correct = action["department"] == info["true_department"]
         ser_correct = action["seriousness"] == info["true_seriousness"]
