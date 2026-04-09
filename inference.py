@@ -1,12 +1,11 @@
 import os
 import sys
 import json
-import time
 from openai import OpenAI
 from env.hospital_env import HospitalEnv
 
 # ==============================
-# 🔇 STRICT LOG CONTROL (CRITICAL)
+# 🔇 STRICT LOG CONTROL
 # ==============================
 old_stdout = sys.stdout
 sys.stdout = sys.stderr
@@ -32,20 +31,45 @@ API_BASE_URL = os.getenv("API_BASE_URL", "https://router.huggingface.co/v1")
 MODEL_NAME = os.getenv("MODEL_NAME", "openai/gpt-oss-120b:groq")
 API_KEY = os.getenv("HF_TOKEN")
 
-USE_LLM = True
-if not API_KEY:
-    USE_LLM = False
+USE_LLM = bool(API_KEY)
 
 client = None
 if USE_LLM:
     try:
         client = OpenAI(base_url=API_BASE_URL, api_key=API_KEY)
     except:
-        client = None
         USE_LLM = False
 
 # ==============================
-# 🧠 HELPERS
+# 🧠 RULE-BASED POLICY (IMPROVED)
+# ==============================
+def fallback_policy(state):
+    symptoms = " ".join(state.get("symptoms", [])).lower()
+
+    # 🚨 TRUE emergencies only
+    if "unconscious" in symptoms or "severe bleeding" in symptoms:
+        return {"department": "emergency", "seriousness": 5}
+
+    # ❤️ cardiology
+    if "chest pain" in symptoms or "palpitations" in symptoms:
+        return {"department": "cardiology", "seriousness": 4}
+
+    # 🫁 lungs
+    if "shortness of breath" in symptoms or "cough" in symptoms:
+        return {"department": "pulmonology", "seriousness": 3}
+
+    # 🧠 neuro
+    if "head injury" in symptoms or "dizziness" in symptoms:
+        return {"department": "neurology", "seriousness": 3}
+
+    # 🦴 ortho
+    if "fracture" in symptoms:
+        return {"department": "orthopedics", "seriousness": 3}
+
+    return {"department": "general", "seriousness": 2}
+
+# ==============================
+# 🧠 SAFE PARSE
 # ==============================
 def safe_parse(text):
     try:
@@ -73,42 +97,52 @@ def normalize_action(action):
     except:
         return fallback_policy({})
 
-def fallback_policy(state):
-    symptoms = " ".join(state.get("symptoms", [])).lower()
-
-    if "unconscious" in symptoms or "severe bleeding" in symptoms:
-        return {"department": "emergency", "seriousness": 5}
-
-    if "chest pain" in symptoms or "palpitations" in symptoms:
-        return {"department": "cardiology", "seriousness": 4}
-
-    if "shortness of breath" in symptoms or "cough" in symptoms:
-        return {"department": "pulmonology", "seriousness": 3}
-
-    if "head injury" in symptoms or "dizziness" in symptoms:
-        return {"department": "neurology", "seriousness": 3}
-
-    if "fracture" in symptoms:
-        return {"department": "orthopedics", "seriousness": 3}
-
-    return {"department": "general", "seriousness": 2}
-
 # ==============================
-# 🤖 LLM
+# 🤖 LLM DECISION (LESS EMERGENCY BIAS)
 # ==============================
 def ask_llm(state):
     if not USE_LLM or client is None:
         return fallback_policy(state)
 
     prompt = f"""
-Assign department and seriousness (1-5).
+You are an intelligent hospital triage system.
 
+Your task:
+- Assign correct department
+- Assign seriousness (1–5)
+
+If multiple symptoms exist, prioritize life-threatening ones,
+but still consider the dominant system affected.
+
+GUIDELINES:
+- Emergency: life-threatening (unconscious, severe bleeding)
+- Cardiology: chest-related symptoms
+- Pulmonology: breathing issues
+- Neurology: brain-related symptoms
+- Orthopedics: bone injuries
+- General: mild or unclear cases
+
+IMPORTANT:
+- Use reasoning for unseen symptoms
+- Consider combinations
+- Use vitals and age for severity
+
+Seriousness:
+1–2 → mild
+3 → moderate
+4–5 → severe/critical
+
+Patient:
 Symptoms: {state.get('symptoms', [])}
 Age: {state.get('age', 0)}
 Heart Rate: {state.get('heart_rate', 0)}
 Blood Pressure: {state.get('blood_pressure', 0)}
 
-Return JSON only.
+Return ONLY JSON:
+{{
+  "department": "...",
+  "seriousness": <1-5>
+}}
 """
 
     try:
@@ -126,7 +160,7 @@ Return JSON only.
         return fallback_policy(state)
 
 # ==============================
-# 🚀 MAIN
+# 🚀 MAIN LOOP
 # ==============================
 def run_inference():
 
@@ -140,10 +174,9 @@ def run_inference():
         state = env.reset()
 
         rewards = []
+        total_reward = 0.0
         done = False
         step = 1
-        total_reward = 0.0
-        error_msg = "null"
 
         try:
             while not done and step <= 5:
@@ -152,6 +185,7 @@ def run_inference():
 
                 state, reward, done, info = env.step(action)
 
+                # normalize reward
                 reward = (reward + 3) / 8
                 reward = max(0.001, min(0.999, reward))
 
@@ -162,15 +196,18 @@ def run_inference():
 
                 step += 1
 
-        except Exception as e:
-            error_msg = str(e).replace("\n", " ")
+        except Exception:
             done = True
 
-        score = max(min(total_reward, 0.999), 0.001)
-        success = done and score > 0
+        # ✅ CORRECT SCORE
+        steps_taken = len(rewards)
+        score = total_reward / steps_taken if steps_taken > 0 else 0.0
+        score = max(0.001, min(0.999, score))
 
-        log_end(success, len(rewards), score, rewards)
+        # ✅ CORRECT SUCCESS
+        success = score >= 0.5
 
+        log_end(success, steps_taken, score, rewards)
 
 # ==============================
 # ▶️ ENTRY
@@ -181,6 +218,3 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"[ERROR] {e}", file=sys.stderr)
         sys.exit(1)
-    while True:
-        time.sleep(5)
-
