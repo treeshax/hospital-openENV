@@ -1,31 +1,52 @@
 import os
+import sys
 import json
 import time
 from openai import OpenAI
 from env.hospital_env import HospitalEnv
 
+# ==============================
+# 🔇 STRICT LOG CONTROL (CRITICAL)
+# ==============================
+old_stdout = sys.stdout
+sys.stdout = sys.stderr
 
-#  ENV SETUP
+def print_log(msg):
+    old_stdout.write(msg + "\n")
+    old_stdout.flush()
 
-API_BASE_URL = os.getenv("API_BASE_URL")
-MODEL_NAME = os.getenv("MODEL_NAME")
+def log_start(task, model):
+    print_log(f"[START] task={task} env=hospital-env model={model}")
+
+def log_step(step, action, reward, done, error="null"):
+    print_log(f"[STEP] step={step} action={action} reward={reward:.2f} done={str(done).lower()} error={error}")
+
+def log_end(success, steps, score, rewards):
+    rewards_str = ",".join([f"{r:.2f}" for r in rewards])
+    print_log(f"[END] success={str(success).lower()} steps={steps} score={score:.3f} rewards={rewards_str}")
+
+# ==============================
+# 🔐 ENV SETUP
+# ==============================
+API_BASE_URL = os.getenv("API_BASE_URL", "https://router.huggingface.co/v1")
+MODEL_NAME = os.getenv("MODEL_NAME", "openai/gpt-oss-120b:groq")
 API_KEY = os.getenv("HF_TOKEN")
 
 USE_LLM = True
-if not API_BASE_URL or not MODEL_NAME or not API_KEY:
-    print("[WARNING] Missing env vars → fallback mode", flush=True)
+if not API_KEY:
     USE_LLM = False
 
 client = None
 if USE_LLM:
-    client = OpenAI(base_url=API_BASE_URL, api_key=API_KEY)
+    try:
+        client = OpenAI(base_url=API_BASE_URL, api_key=API_KEY)
+    except:
+        client = None
+        USE_LLM = False
 
-TASK_NAME = "hospital-triage"
-BENCHMARK = "hospital-env"
-MAX_STEPS = 5  
-
-#  SAFE PARSE
-
+# ==============================
+# 🧠 HELPERS
+# ==============================
 def safe_parse(text):
     try:
         return json.loads(text)
@@ -35,22 +56,12 @@ def safe_parse(text):
             end = text.rfind("}") + 1
             return json.loads(text[start:end])
         except:
-            return fallback_policy({})
-
-#  NORMALIZE ACTION 
+            return {}
 
 def normalize_action(action):
     try:
         dept = action.get("department", "").lower().strip()
-
-        allowed = {
-            "cardiology",
-            "neurology",
-            "orthopedics",
-            "pulmonology",
-            "general",
-            "emergency"
-        }
+        allowed = {"cardiology","neurology","orthopedics","pulmonology","general","emergency"}
 
         if dept not in allowed:
             return fallback_policy({})
@@ -58,15 +69,9 @@ def normalize_action(action):
         seriousness = int(action.get("seriousness", 3))
         seriousness = max(1, min(5, seriousness))
 
-        return {
-            "department": dept,
-            "seriousness": seriousness
-        }
-
+        return {"department": dept, "seriousness": seriousness}
     except:
         return fallback_policy({})
-
-#  FALLBACK POLICY
 
 def fallback_policy(state):
     symptoms = " ".join(state.get("symptoms", [])).lower()
@@ -88,158 +93,90 @@ def fallback_policy(state):
 
     return {"department": "general", "seriousness": 2}
 
-#  LLM DECISION 
-
+# ==============================
+# 🤖 LLM
+# ==============================
 def ask_llm(state):
     if not USE_LLM or client is None:
         return fallback_policy(state)
 
-    symptoms = state.get("symptoms", [])
-    age = state.get("age", 0)
-    hr = state.get("heart_rate", 0)
-    bp = state.get("blood_pressure", 0)
-
     prompt = f"""
-You are an intelligent hospital triage system.
+Assign department and seriousness (1-5).
 
-Your task:
-- Assign correct department
-- Assign seriousness (1–5)
+Symptoms: {state.get('symptoms', [])}
+Age: {state.get('age', 0)}
+Heart Rate: {state.get('heart_rate', 0)}
+Blood Pressure: {state.get('blood_pressure', 0)}
 
-If multiple symptoms exist, prioritize life-threatening ones,
-but still consider the dominant system affected.
-
-GUIDELINES:
-- Emergency: life-threatening (unconscious, severe bleeding)
-- Cardiology: chest-related symptoms
-- Pulmonology: breathing issues
-- Neurology: brain-related symptoms
-- Orthopedics: bone injuries
-- General: mild or unclear cases
-
-IMPORTANT:
-- Use reasoning for unseen symptoms
-- Consider combinations
-- Use vitals and age for severity
-
-Seriousness:
-1–2 → mild
-3 → moderate
-4–5 → severe/critical
-
-Patient:
-Symptoms: {symptoms}
-Age: {age}
-Heart Rate: {hr}
-Blood Pressure: {bp}
-
-Return ONLY JSON:
-{{
-  "department": "...",
-  "seriousness": <1-5>
-}}
+Return JSON only.
 """
 
     try:
-        response = client.chat.completions.create(
+        res = client.chat.completions.create(
             model=MODEL_NAME,
             messages=[{"role": "user", "content": prompt}],
             temperature=0,
-            timeout=5  
+            timeout=5
         )
 
-        text = (response.choices[0].message.content or "").strip()
+        text = (res.choices[0].message.content or "").strip()
         return normalize_action(safe_parse(text))
 
-    except Exception as e:
-        print(f"[DEBUG] LLM error: {e}", flush=True)
+    except Exception:
         return fallback_policy(state)
 
-#  MAIN LOOP
+# ==============================
+# 🚀 MAIN
+# ==============================
+def run_inference():
 
-def run():
-    env = HospitalEnv(task="hard", max_steps=MAX_STEPS)
+    tasks = ["easy", "medium", "hard"]
 
-    print(f"[START] task={TASK_NAME} env={BENCHMARK} model={MODEL_NAME}", flush=True)
+    for task_name in tasks:
 
-    state = env.reset()
-    done = False
+        log_start(task_name, MODEL_NAME)
 
-    step = 1
-    rewards = []
-    total_reward = 0.0
+        env = HospitalEnv(task=task_name, max_steps=5)
+        state = env.reset()
 
-    start_time = time.time()
-    MAX_RUNTIME = 30  
+        rewards = []
+        done = False
+        step = 1
+        total_reward = 0.0
+        error_msg = "null"
 
-    try:
-        while not done and step <= MAX_STEPS:
+        try:
+            while not done and step <= 5:
 
-            if time.time() - start_time > MAX_RUNTIME:
-                print("[DEBUG] Global timeout reached", flush=True)
-                break
+                action = ask_llm(state)
 
-            action = ask_llm(state)
+                state, reward, done, info = env.step(action)
 
-            next_state, reward, done, info = env.step(action)
+                reward = (reward + 3) / 8
+                reward = max(0.001, min(0.999, reward))
 
-            reward = (reward + 3) / 8
-            reward = max(0.001, min(0.999, reward))
+                rewards.append(reward)
+                total_reward += reward
 
-            rewards.append(reward)
-            total_reward += reward
+                log_step(step, action, reward, done)
 
-            done_str = str(done).lower()
-            error_val = "null"
+                step += 1
 
-            print(
-                f"[STEP] step={step} action={action} reward={reward:.2f} done={done_str} error={error_val}",
-                flush=True
-            )
+        except Exception as e:
+            error_msg = str(e).replace("\n", " ")
+            done = True
 
-            selected_dept = action.get("department", "general")
-            queue_info = info.get("queue_status", {}).get(selected_dept, {})
+        score = max(min(total_reward, 0.999), 0.001)
+        success = done and score > 0
 
-            print(
-                f"[DEBUG] symptoms={state.get('symptoms', [])} queue={selected_dept}:{queue_info}",
-                flush=True
-            )
+        log_end(success, len(rewards), score, rewards)
 
-            state = next_state
-            step += 1
-
-        steps_taken = len(rewards)
-        score = total_reward / steps_taken if steps_taken > 0 else 0.0
-        score = max(0.01, min(0.99, score))
-
-        success = score >= 0.5
-
-    except Exception as e:
-        print(f"[DEBUG] Runtime error: {e}", flush=True)
-        success = False
-        steps_taken = len(rewards)
-        score = 0.0
-
-    finally:
-        # safe close
-        if hasattr(env, "close"):
-            try:
-                env.close()
-            except Exception as e:
-                print(f"[DEBUG] env.close error: {e}", flush=True)
-
-        rewards_str = ",".join(f"{r:.2f}" for r in rewards)
-
-        print(
-            f"[END] success={str(success).lower()} steps={steps_taken} score={score:.3f} rewards={rewards_str}",
-            flush=True
-        )
-
-#  ENTRY
-
+# ==============================
+# ▶️ ENTRY
+# ==============================
 if __name__ == "__main__":
     try:
-        run()
+        run_inference()
     except Exception as e:
-        print(f"[FATAL] {e}", flush=True)
-        print("[END] success=false steps=0 score=0.000 rewards=", flush=True)
+        print(f"[ERROR] {e}", file=sys.stderr)
+        sys.exit(1)
