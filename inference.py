@@ -4,26 +4,25 @@ import time
 from openai import OpenAI
 from env.hospital_env import HospitalEnv
 
+#  ENV SETUP
 API_BASE_URL = os.getenv("API_BASE_URL")
 MODEL_NAME = os.getenv("MODEL_NAME")
 API_KEY = os.getenv("HF_TOKEN")
 
 USE_LLM = True
 if not API_BASE_URL or not MODEL_NAME or not API_KEY:
-    print("[WARNING] Missing env vars → using fallback", flush=True)
+    print("[WARNING] Missing env vars → fallback mode", flush=True)
     USE_LLM = False
 
 client = None
 if USE_LLM:
-    client = OpenAI(
-        base_url=API_BASE_URL,
-        api_key=API_KEY,
-    )
+    client = OpenAI(base_url=API_BASE_URL, api_key=API_KEY)
 
 TASK_NAME = "hospital-triage"
 BENCHMARK = "hospital-env"
-MAX_STEPS = 10
+MAX_STEPS = 5  # optimized
 
+#  SAFE PARSE
 def safe_parse(text):
     try:
         return json.loads(text)
@@ -33,11 +32,9 @@ def safe_parse(text):
             end = text.rfind("}") + 1
             return json.loads(text[start:end])
         except:
-            return {
-                "department": "general",
-                "seriousness": 3
-            }
+            return fallback_policy({})
 
+#  FALLBACK POLICY
 def fallback_policy(state):
     symptoms = " ".join(state.get("symptoms", [])).lower()
 
@@ -58,6 +55,8 @@ def fallback_policy(state):
 
     return {"department": "general", "seriousness": 2}
 
+#  LLM DECISION (REASONING-FIRST)
+
 def ask_llm(state):
     if not USE_LLM or client is None:
         return fallback_policy(state)
@@ -68,20 +67,29 @@ def ask_llm(state):
     bp = state.get("blood_pressure", 0)
 
     prompt = f"""
-You are a STRICT hospital triage system.
+You are an intelligent hospital triage system.
 
-CRITICAL RULES:
-- unconscious OR severe bleeding → emergency (seriousness 5)
-- chest pain + shortness of breath → cardiology (seriousness 5)
+Your task:
+- Assign correct department
+- Assign seriousness (1–5)
 
-DEPARTMENTS:
-- chest pain → cardiology
-- breathing issues → pulmonology
-- head injury → neurology
-- fracture → orthopedics
+GUIDELINES (use reasoning, not strict mapping):
+- Emergency: life-threatening (unconscious, severe bleeding)
+- Cardiology: chest-related symptoms
+- Pulmonology: breathing issues
+- Neurology: brain-related symptoms (dizziness, head injury)
+- Orthopedics: bone injuries
+- General: mild or unclear cases
 
-SERIOUSNESS:
-5 = critical, 4 = severe, 3 = moderate, 2 = mild
+IMPORTANT:
+- Use medical reasoning for unseen symptoms
+- Consider combinations of symptoms
+- Consider severity using vitals and age
+
+Seriousness:
+1–2 → mild
+3 → moderate
+4–5 → severe/critical
 
 Patient:
 Symptoms: {symptoms}
@@ -100,7 +108,8 @@ Return ONLY JSON:
         response = client.chat.completions.create(
             model=MODEL_NAME,
             messages=[{"role": "user", "content": prompt}],
-            temperature=0
+            temperature=0,
+            timeout=5  # 🔥 critical for validator
         )
 
         text = (response.choices[0].message.content or "").strip()
@@ -110,6 +119,7 @@ Return ONLY JSON:
         print(f"[DEBUG] LLM error: {e}", flush=True)
         return fallback_policy(state)
 
+#  MAIN LOOP
 def run():
     env = HospitalEnv(task="hard", max_steps=MAX_STEPS)
 
@@ -122,14 +132,22 @@ def run():
     rewards = []
     total_reward = 0.0
 
+    start_time = time.time()
+    MAX_RUNTIME = 30  # 🔥 safety cap
+
     try:
         while not done and step <= MAX_STEPS:
+
+            # global timeout protection
+            if time.time() - start_time > MAX_RUNTIME:
+                print("[DEBUG] Global timeout reached", flush=True)
+                break
 
             action = ask_llm(state)
 
             next_state, reward, done, info = env.step(action)
 
-            # normalize reward → [0,1]
+            # normalize reward
             reward = (reward + 3) / 8
             reward = max(0.001, min(0.999, reward))
 
@@ -139,13 +157,12 @@ def run():
             done_str = str(done).lower()
             error_val = "null"
 
-            # STRICT FORMAT
             print(
                 f"[STEP] step={step} action={action} reward={reward:.2f} done={done_str} error={error_val}",
                 flush=True
             )
 
-            # DEBUG SAFE
+            # safe debug
             selected_dept = action.get("department", "general")
             queue_info = info.get("queue_status", {}).get(selected_dept, {})
 
@@ -157,7 +174,7 @@ def run():
             state = next_state
             step += 1
 
-        # FINAL SCORE
+        # final score
         steps_taken = len(rewards)
         score = total_reward / steps_taken if steps_taken > 0 else 0.0
         score = max(0.0, min(1.0, score))
@@ -171,7 +188,6 @@ def run():
         score = 0.0
 
     finally:
-        # close env safely
         try:
             env.close()
         except Exception as e:
@@ -184,6 +200,7 @@ def run():
             flush=True
         )
 
+#  ENTRY
 if __name__ == "__main__":
     try:
         run()
@@ -191,6 +208,5 @@ if __name__ == "__main__":
         print(f"[FATAL] {e}", flush=True)
         print("[END] success=false steps=0 score=0.000 rewards=", flush=True)
 
-    # keep container alive (HF requirement)
     while True:
         time.sleep(60)
