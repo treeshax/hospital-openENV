@@ -110,6 +110,9 @@ Your task:
 - Assign correct department
 - Assign seriousness (1–5)
 
+If multiple symptoms exist, prioritize life-threatening ones,
+but still consider the dominant system affected.
+
 GUIDELINES:
 - Emergency: life-threatening (unconscious, severe bleeding)
 - Cardiology: chest-related symptoms
@@ -216,7 +219,7 @@ def run():
         # final score
         steps_taken = len(rewards)
         score = total_reward / steps_taken if steps_taken > 0 else 0.0
-        score = max(0.0, min(1.0, score))
+        score = max(0.01, min(0.99, score))
 
         success = score >= 0.5
 
