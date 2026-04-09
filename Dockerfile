@@ -12,5 +12,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
 
+# Clean up local environment artifacts if any
+RUN rm -rf __pycache__ .pytest_cache
+
 # Default command
-CMD ["uvicorn", "server.app:app", "--host", "0.0.0.0", "--port", "7860"]
+CMD ["uvicorn", "app.api.main:app", "--host", "0.0.0.0", "--port", "7860"]
