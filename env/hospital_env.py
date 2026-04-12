@@ -46,6 +46,19 @@ class HospitalEnv:
 
         return self.state()
 
+    # COMPLIANCE: CLOSE ENVIRONMENT
+    def close(self):
+        """Cleanup logic for OpenENV server."""
+        self.queue.clear()
+        self.department_queues.clear()
+
+    # ASYNC COMPLIANCE
+    async def reset_async(self, seed=None, options=None):
+        return self.reset()
+
+    async def step_async(self, action):
+        return self.step(action)
+
     # CURRENT STATE
     def state(self):
         return {

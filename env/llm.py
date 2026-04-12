@@ -13,9 +13,10 @@ MODEL_NAME = os.getenv("MODEL_NAME", "meta-llama/Llama-3.1-70B-Instruct") # Defa
 
 class LLMBrain:
     def __init__(self):
+        token = os.environ.get("HF_TOKEN", "dummy_token")
         self.client = OpenAI(
             base_url=API_BASE_URL,
-            api_key=os.environ["HF_TOKEN"],
+            api_key=token,
         )
         self.model = MODEL_NAME
 
