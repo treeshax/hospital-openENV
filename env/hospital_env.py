@@ -1,11 +1,7 @@
-from env.models import Action
+from env.models import Action, Patient
 from env.generator import generate_patient
-
-from env.tasks import (
-    easy_task_reward,
-    medium_task_reward,
-    hard_task_reward
-)
+from env.evaluator import evaluator
+from env.evolver import evolver
 
 from collections import defaultdict
 import random
@@ -26,151 +22,79 @@ class HospitalEnv:
 
         # 🏥 Department-wise queues
         self.department_queues = defaultdict(list)
+        self.bed_capacity = {
+            "cardiology": 5,
+            "neurology": 5,
+            "orthopedics": 5,
+            "pulmonology": 5,
+            "general": 10,
+            "emergency": 3
+        }
 
     # RESET ENVIRONMENT
     def reset(self):
+        # Initial queue generation
         self.queue = [generate_patient(self.task) for _ in range(self.max_steps)]
-        random.shuffle(self.queue)
-
+        
         self.current_step = 0
         self.correct = 0
         self.total = 0
 
         self.department_queues.clear()
-
         self.patient = self.queue.pop(0)
 
         return self.state()
 
-    #  FEATURE ENGINEERING
-    def _compute_risk(self, patient):
-        return {
-            "high_heart_rate": patient.heart_rate > 120,
-            "low_blood_pressure": patient.blood_pressure < 90,
-            "elderly": patient.age > 65
-        }
-
     # CURRENT STATE
     def state(self):
-        risk = self._compute_risk(self.patient)
-
         return {
+            "vignette": self.patient.vignette,
             "symptoms": self.patient.symptoms,
-            "age": self.patient.age / 100,
-            "heart_rate": self.patient.heart_rate / 200,
-            "blood_pressure": self.patient.blood_pressure / 200,
-            "risk": risk,
+            "age": self.patient.age,
+            "vitals": {
+                "heart_rate": self.patient.heart_rate,
+                "bp": f"{self.patient.blood_pressure_sys}/{self.patient.blood_pressure_dia}",
+                "temp": self.patient.temperature_c,
+                "o2": self.patient.o2_saturation,
+                "rr": self.patient.respiratory_rate
+            },
             "difficulty": self.task,
-            "progress": self.current_step / self.max_steps
+            "progress": self.current_step / self.max_steps,
+            "queue_status": self.get_queue_status()
         }
-
-    # VALIDATE ACTION
-    def _validate_action(self, action_dict):
-        required_keys = ["seriousness", "department"]
-        for key in required_keys:
-            if key not in action_dict:
-                raise ValueError(f"Missing key in action: {key}")
 
     # GET QUEUE STATUS
     def get_queue_status(self):
         status = {}
-
         for dept, patients in self.department_queues.items():
             status[dept] = {
-                "total": len(patients),
-                "seriousness_levels": [p["seriousness"] for p in patients]
+                "count": len(patients),
+                "capacity": self.bed_capacity.get(dept, 5),
+                "overflow": len(patients) > self.bed_capacity.get(dept, 5)
             }
-
         return status
 
     # 🎯 STEP FUNCTION (CORE LOGIC)
     def step(self, action_dict):
-        self._validate_action(action_dict)
-
         action = Action(**action_dict)
         current_patient = self.patient
 
-        # 🧠 BASE REWARD FROM TASK
-        reward = self._get_reward(current_patient, action.model_dump())
-
-        step_correct = 0  # track per-step correctness
-
-        # DEPARTMENT CORRECTNESS
-        if action_dict["department"] == current_patient.department:
-            reward += 2
-            step_correct += 1
-        else:
-            reward -= 1
-
-        #  SERIOUSNESS CORRECTNESS (GRADED)
-        true_ser = current_patient.true_seriousness
-        pred_ser = action_dict["seriousness"]
-
-        diff = abs(true_ser - pred_ser)
-
-        if diff == 0:
-            reward += 2
-        elif diff == 1:
-            reward += 1.2
-        elif diff == 2:
-            reward += 0.5
-        else:
-            reward -= 1.5
-
-        # CRITICAL SAFETY PENALTY
-        if true_ser >=4 and pred_ser <= 2:
-            reward -= 2
-
-        # OVERREACTION PENALTY
-        if true_ser <= 2 and pred_ser == 5:
-            reward -= 0.5
-
-        # QUEUE CORRECTNESS (BEFORE INSERT)
-        queue_info = self.get_queue_status()
-        selected_dept = action_dict["department"]
-        predicted_ser = action_dict["seriousness"]
-
-        queue_correct = False
-
-        if selected_dept in queue_info:
-            existing_levels = queue_info[selected_dept]["seriousness_levels"]
-
-            if len(existing_levels) == 0:
-                queue_correct = True
-            else:
-                avg_severity = sum(existing_levels) / len(existing_levels)
-                if predicted_ser >= avg_severity:
-                    queue_correct = True
-        else:
-            queue_correct = True
-
-        # 🎯 APPLY QUEUE REWARD
-        if queue_correct:
-            reward += 0.5
-        else:
-            reward -= 0.3
-
-        # ADD PATIENT TO QUEUE
-        dept = action_dict["department"]
-        ser = action_dict["seriousness"]
-
+        # 🧠 EXPERT EVALUATION (THE BRAIN)
+        eval_result = evaluator.evaluate(current_patient.model_dump(), action.model_dump())
+        reward = eval_result.get("score", 0.0)
+        
+        # LOGIC: ADMIT PATIENT
+        dept = action.department
         self.department_queues[dept].append({
             "patient": current_patient,
-            "seriousness": ser
+            "admitted_step": self.current_step,
+            "seriousness": action.seriousness
         })
 
-        # 🔥 SORT BY PRIORITY
-        self.department_queues[dept].sort(
-            key=lambda x: x["seriousness"],
-            reverse=True
-        )
-        # UPDATE METRICS
-        self.correct += step_correct
-        self.total += 2  # dept + seriousness
+        # 🔥 UPDATE QUEUES & EVOLVE STATE
+        self._update_environment()
 
         self.current_step += 1
-
-        # NEXT STATE
         done = (len(self.queue) == 0) or (self.current_step >= self.max_steps)
 
         if not done:
@@ -179,31 +103,24 @@ class HospitalEnv:
         else:
             next_state = None
 
-        # INFO (FOR TRAINING + DEBUG)
         info = {
-            "task": self.task,
+            "eval": eval_result,
             "true_seriousness": current_patient.true_seriousness,
             "true_department": current_patient.department,
-            "agent_action": action_dict,
-            "accuracy": self.correct / self.total if self.total > 0 else 0,
             "step": self.current_step,
-            "reward": reward,
-            "queue_status": self.get_queue_status(),
-            "queue_correct": queue_correct
+            "reward": reward
         }
 
         return next_state, reward, done, info
 
-    # REWARD ROUTER
-    def _get_reward(self, patient, action):
-        if self.task == "easy":
-            return easy_task_reward(patient, action)
-
-        elif self.task == "medium":
-            return medium_task_reward(patient, action)
-
-        elif self.task == "hard":
-            return hard_task_reward(patient, action)
-
-        else:
-            raise ValueError(f"Unknown task: {self.task}")
+    def _update_environment(self):
+        # Evolve patients in queues (those not yet "treated")
+        for dept, queue in self.department_queues.items():
+            for entry in queue:
+                patient = entry["patient"]
+                wait = self.current_step - entry["admitted_step"]
+                if wait > 0:
+                    # Deterioration logic
+                    evolution = evolver.evolve(patient.model_dump(), wait)
+                    patient.heart_rate = evolution.get("vitals", {}).get("heart_rate", patient.heart_rate)
+                    patient.true_seriousness = evolution.get("true_seriousness", patient.true_seriousness)
