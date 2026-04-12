@@ -22,7 +22,7 @@ from env.tools import get_hospital_tools
 app = create_app(
     HospitalEnv,
     Action,
-    dict, # Observation type
+    dict,
     env_name="hospital-triage-env",
     max_concurrent_envs=10,
 )

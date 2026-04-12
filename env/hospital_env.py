@@ -8,6 +8,7 @@ import random
 
 
 class HospitalEnv:
+    SUPPORTS_CONCURRENT_SESSIONS = True
 
     def __init__(self, task="easy", max_steps=10):
         self.task = task
